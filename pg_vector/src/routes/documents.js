@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const pool = require('../db');
 const { generateEmbedding } = require('../embedding');
+const slugify = require('slugify');
 
 const router = Router();
 
@@ -17,11 +18,13 @@ router.post('/', asyncHandler(async (req, res) => {
   }
 
   const embedding = await generateEmbedding(content);
+  const baseSlug = slugify(title, { lower: true, strict: true });
 
   const result = await pool.query(
-    `INSERT INTO documents (title, content, embedding) VALUES ($1, $2, $3)
-     RETURNING id, title, content, created_at`,
-    [title, content, JSON.stringify(embedding)]
+    `INSERT INTO documents (title, slug, content, embedding)
+     VALUES ($1, $2 || '-' || nextval('documents_slug_seq')::TEXT, $3, $4)
+     RETURNING id, title, slug, content, created_at`,
+    [title, baseSlug, content, JSON.stringify(embedding)]
   );
 
   res.status(201).json(result.rows[0]);
@@ -40,7 +43,7 @@ router.get('/search', asyncHandler(async (req, res) => {
   let query;
   if (match === 'true') {
     query = `
-      SELECT id, title, content, created_at,
+      SELECT id, title, slug, content, created_at,
              embedding <-> $1::vector AS distance
       FROM documents
       WHERE embedding <-> $1::vector < $2
@@ -49,7 +52,7 @@ router.get('/search', asyncHandler(async (req, res) => {
     `;
   } else {
     query = `
-      SELECT id, title, content, created_at,
+      SELECT id, title, slug, content, created_at,
              embedding <-> $1::vector AS distance
       FROM documents
       ORDER BY distance
@@ -68,7 +71,7 @@ router.get('/search', asyncHandler(async (req, res) => {
 
 router.get('/', asyncHandler(async (req, res) => {
   const result = await pool.query(
-    'SELECT id, title, content, created_at FROM documents ORDER BY created_at DESC'
+    'SELECT id, title, slug, content, created_at FROM documents ORDER BY created_at DESC'
   );
   res.json(result.rows);
 }));
@@ -76,7 +79,7 @@ router.get('/', asyncHandler(async (req, res) => {
 router.delete('/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const result = await pool.query(
-    'DELETE FROM documents WHERE id = $1 RETURNING id, title',
+    'DELETE FROM documents WHERE id = $1 RETURNING id, title, slug',
     [id]
   );
   if (result.rows.length === 0) {

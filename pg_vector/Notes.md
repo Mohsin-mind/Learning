@@ -38,10 +38,12 @@ sudo -u postgres psql -d vector_demo -c "
 CREATE TABLE documents (
   id SERIAL PRIMARY KEY,
   title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
   content TEXT NOT NULL,
   embedding VECTOR(384),        -- change to 1024 if using Jina
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE SEQUENCE IF NOT EXISTS documents_slug_seq;
 
 INSERT INTO documents (title, content, embedding) VALUES
   ('apple',  'A fruit that grows on trees',    '[1, 0, 0]'),

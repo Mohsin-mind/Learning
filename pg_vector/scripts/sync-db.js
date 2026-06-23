@@ -18,7 +18,10 @@ async function main() {
   try {
     await pool.query('ALTER TABLE documents DROP COLUMN IF EXISTS embedding');
     await pool.query(`ALTER TABLE documents ADD COLUMN embedding vector(${dim})`);
-    console.log(`Column updated to vector(${dim})`);
+
+    await pool.query(`ALTER TABLE documents ADD COLUMN IF NOT EXISTS slug TEXT UNIQUE`);
+    await pool.query(`CREATE SEQUENCE IF NOT EXISTS documents_slug_seq`);
+    console.log('Slug column and sequence ready');
   } finally {
     await pool.end();
   }
