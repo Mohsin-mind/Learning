@@ -118,6 +118,104 @@ echo "mind" | sudo -S -u postgres psql -d vector_demo -c "
 | `local` | `src/providers/local.js` | 384 | Model cached in `./model_cache` |
 | `jina` | `src/providers/jina.js` | 1024 | `JINA_API_KEY` in `.env` |
 
-## Data
+---
 
-Data stored in local storage vector_demo -> documents table.
+# PostgREST — Auto-generated REST API
+
+PostgREST turns a PostgreSQL schema into a REST API with zero code. It maps tables → endpoints, columns → fields, and uses HTTP verbs for CRUD.
+
+## Setup
+
+```bash
+# 1. Install PostgREST binary
+curl -sL https://github.com/PostgREST/postgrest/releases/download/v14.13/postgrest-v14.13-linux-static-x86-64.tar.xz -o /tmp/pgrst.tar.xz
+tar -xf /tmp/pgrst.tar.xz -C /tmp
+sudo cp /tmp/postgrest /usr/local/bin/postgrest
+
+# 2. Create schema, table & anonymous role
+PGPASSWORD=Mind@123 psql -h localhost -U postgres -d vector_demo -c "
+CREATE SCHEMA IF NOT EXISTS api;
+
+CREATE TABLE IF NOT EXISTS api.products (
+  id    SERIAL PRIMARY KEY,
+  name  TEXT NOT NULL,
+  price NUMERIC(10,2) NOT NULL,
+  category TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE ROLE web_anon NOINHERIT LOGIN;
+GRANT USAGE ON SCHEMA api TO web_anon;
+GRANT ALL ON api.products TO web_anon;
+GRANT USAGE ON SEQUENCE api.products_id_seq TO web_anon;
+"
+
+# 3. Start PostgREST
+postgrest ./postgrest.conf
+```
+
+## API Endpoints (auto-generated)
+
+All at `http://localhost:3001`:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/products` | List all products |
+| GET | `/products?id=eq.1` | Filter by id |
+| POST | `/products` | Create product |
+| PATCH | `/products?id=eq.1` | Update product |
+| DELETE | `/products?id=eq.1` | Delete product |
+
+## Examples
+
+```bash
+# List
+curl http://localhost:3001/products
+
+# Create (returns new row with `Prefer: return=representation`)
+curl -X POST http://localhost:3001/products \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=representation" \
+  -d '{"name":"Keyboard","price":89.99,"category":"Electronics"}'
+
+# Update
+curl -X PATCH 'http://localhost:3001/products?id=eq.1' \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=representation" \
+  -d '{"price":24.99}'
+
+# Delete
+curl -X DELETE 'http://localhost:3001/products?id=eq.4'
+```
+
+## How it works
+
+- PostgREST reads the `api` schema and exposes every table as `/tablename`
+- HTTP verbs map directly: GET (read), POST (create), PATCH (update), DELETE
+- Filtering via query params: `?column=eq.value`, `?column=gte.value`, `?column=like.*pattern*`
+- No application code needed — it's all database-driven
+- The `db-anon-role` defines permissions for unauthenticated users
+- For auth, add a JWT secret to `postgrest.conf` and use RLS policies
+
+## Config (`postgrest.conf`)
+
+```
+db-uri = "postgres://postgres:Mind%40123@localhost:5432/vector_demo"
+db-schemas = "api"
+db-anon-role = "web_anon"
+server-port = 3001
+```
+## Stop postgrest
+```bash
+pnpm pgrest:stop
+
+or
+
+pkill postgrest && echo "stopped" || echo "not running"
+```
+
+## Stack
+
+- **PostgREST 14.13** — standalone HTTP server
+- **PostgreSQL 17** — single source of truth (schema, permissions, data)
+- No Express routes needed for products — PostgREST generates them

@@ -7,6 +7,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "sync-db": "node scripts/sync-db.js",
+    "pgrst": "postgrest postgrest.conf",
+    "pgrest:stop": "pkill postgrest && echo \"stopped\" || echo \"not running\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
