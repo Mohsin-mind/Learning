@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../../users/users.service';
+import type { IUsersService } from '../../users/interfaces/users-service.interface';
+import { USERS_SERVICE_TOKEN } from '../../users/interfaces/users-service.interface';
 
 interface JwtPayload {
   sub: string;
@@ -13,7 +14,8 @@ interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     config: ConfigService,
-    private readonly usersService: UsersService,
+    @Inject(USERS_SERVICE_TOKEN)
+    private readonly usersService: IUsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

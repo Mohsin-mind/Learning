@@ -27,15 +27,27 @@ Build a production-grade NestJS API to learn the framework's core and advanced f
 ```
 src/
   auth/           # Login, register, JWT, roles guard
-  users/          # User entity, service, controller
+  users/          # User entity, service, controller, repository
   products/       # Product CRUD
   orders/         # Order creation, status management
   payments/       # Payment webhook handling
   files/          # File upload
-  common/         # Shared decorators, filters, interceptors, pipes, middleware
+  common/         # Shared decorators, filters, interceptors, pipes, constants
   config/         # ConfigModule with env validation
-  database/       # TypeORM connection setup
+  database/       # TypeORM connection setup + seeds
+    seeds/
+      seed.ts         # Entry point (NestFactory.createApplicationContext)
+      user.seed.ts    # Seeds admin + user accounts
 ```
+
+## Architecture Patterns (from NestJS skill)
+
+| Rule | Status | Notes |
+|------|--------|-------|
+| `arch-feature-modules` | ✅ | Organized by feature |
+| `arch-use-repository-pattern` | ✅ | `UserRepository extends Repository<User>` |
+| `di-use-interfaces-tokens` | ✅ | `USERS_SERVICE_TOKEN` Symbol, `IUsersService` interface |
+| `security-sanitize-output` | ✅ | `@Exclude()` on password + global `ClassSerializerInterceptor` |
 
 ## Phases & Checklist
 
@@ -46,9 +58,9 @@ src/
 | 1.1 | Organize feature modules (auth, users, products, orders, payments, files) | [x] | All module dirs created; products/orders/payments/files need module files |
 | 1.2 | Create controllers for each module | [~] | Auth controller done; others need controllers |
 | 1.3 | Create services with business logic | [~] | AuthService, UsersService done |
-| 1.4 | Use Dependency Injection properly | [x] | Constructor injection; interface tokens for services (`USERS_SERVICE_TOKEN`) |
-| 1.5 | Define DTOs for all inputs/outputs | [~] | RegisterDto, LoginDto done; more needed |
-| 1.6 | Add validation with `class-validator` + `ValidationPipe` | [x] | Global ValidationPipe with whitelist + transform |
+| 1.4 | Use Dependency Injection properly | [x] | Constructor injection; interface tokens for services |
+| 1.5 | Define DTOs for all inputs/outputs | [~] | RegisterDto, LoginDto done with @ApiProperty |
+| 1.6 | Add validation with `class-validator` + `ValidationPipe` | [x] | Global ValidationPipe with whitelist + transform; password regex via `REGEX.PASSWORD` constant |
 
 ### Phase 2 — Middleware, Guards & Decorators
 
@@ -56,7 +68,7 @@ src/
 |---|------|------|-------|
 | 2.1 | Create a custom Pipe (e.g., ParseIdPipe) | [x] | ParseUUIDPipe in common/pipes |
 | 2.2 | Add Middleware (e.g., request logging) | | |
-| 2.3 | Implement JWT Guard | [x] | JwtStrategy + AuthGuard('jwt') |
+| 2.3 | Implement JWT Guard | [x] | JwtStrategy uses `@Inject(USERS_SERVICE_TOKEN)` |
 | 2.4 | Implement Roles Guard | [x] | RolesGuard + @Roles() decorator |
 | 2.5 | Create `@CurrentUser()` custom decorator | [x] | In common/decorators |
 
@@ -65,7 +77,7 @@ src/
 | # | Task | Done | Notes |
 |---|------|------|-------|
 | 3.1 | Global Exception Filter | [x] | HttpExceptionFilter in common/filters |
-| 3.2 | Interceptors (logging, transform, timeout) | [~] | LoggingInterceptor done; more can be added |
+| 3.2 | Interceptors (logging, transform, timeout) | [x] | LoggingInterceptor + ClassSerializerInterceptor (global) |
 | 3.3 | ConfigModule with environment validation | [x] | Using @nestjs/config + Joi |
 
 ### Phase 4 — Database & Auth
@@ -73,9 +85,9 @@ src/
 | # | Task | Done | Notes |
 |---|------|------|-------|
 | 4.1 | Install TypeORM + PostgreSQL driver | [x] | typeorm + pg installed |
-| 4.2 | Create entities (User, Product, Order, OrderItem, Payment) | [~] | User entity done (with role field); others pending |
+| 4.2 | Create entities (User, Product, Order, OrderItem, Payment) | [~] | User entity done (with role field + @Exclude on password); others pending |
 | 4.3 | Create database module with connection | [x] | DatabaseModule with async config |
-| 4.4 | TypeORM repositories in services | [x] | Custom `UserRepository` extends Repository; `UsersService` injects repository, no `@InjectRepository` |
+| 4.4 | TypeORM repositories in services | [x] | Custom `UserRepository` extends Repository; no `@InjectRepository` |
 | 4.5 | User registration endpoint | [x] | POST /auth/register |
 | 4.6 | User login with JWT token | [x] | POST /auth/login |
 | 4.7 | Admin / User role-based authorization | [x] | RolesGuard + UserRole enum + @Roles() |
@@ -90,7 +102,7 @@ src/
 | 5.4 | Caching layer | | |
 | 5.5 | Cron jobs (e.g., clean stale orders) | | |
 | 5.6 | EventEmitter for async flows | | |
-| 5.7 | Swagger / OpenAPI setup | [x] | Add @ApiTags, @ApiOperation, @ApiBearerAuth to every new controller/endpoint |
+| 5.7 | Swagger / OpenAPI setup | [x] | Add @ApiTags, @ApiOperation, @ApiBearerAuth, @ApiProperty to every new endpoint |
 | 5.8 | Webhook simulation endpoint | | |
 
 ### Phase 6 — Testing
@@ -148,33 +160,41 @@ GET /users/:id          # Get user detail (admin only)
 
 ## Current State
 
-**Project scaffolded with NestJS 11 + TypeScript strict mode.**
-**Build passes cleanly.**
+**✅ Build passes cleanly — 0 errors, 0 lint warnings**
 
 ### What's built so far:
 - ConfigModule with env file + Joi validation
 - DatabaseModule with async TypeORM connection (PostgreSQL)
-- User entity with `UserRole` enum (`user` | `admin`)
-- UsersService with `findByEmail`, `findById`, `create`
-- Auth module with register, login, JWT strategy
-- Common module with `@CurrentUser()`, `RolesGuard`, `@Roles()`, `HttpExceptionFilter`, `LoggingInterceptor`, `ParseUUIDPipe`
-- Global ValidationPipe in main.ts
+- `User` entity with `UserRole` enum, `@Exclude()` on password
+- `UserRepository` extends `Repository<User>` (repository pattern)
+- `UsersService` implements `IUsersService` interface, injected via `USERS_SERVICE_TOKEN`
+- Auth module with register, login, JWT strategy, profile
+- Common: `@CurrentUser()`, `RolesGuard`, `@Roles()`, `HttpExceptionFilter`, `LoggingInterceptor`, `ClassSerializerInterceptor`, `ParseUUIDPipe`
+- Global `ValidationPipe` (whitelist + transform)
+- Global `ClassSerializerInterceptor` (auto-strips `@Exclude()` fields)
+- Swagger at `http://localhost:3000/api/docs` with bearer auth
+- `REGEX.PASSWORD` constant for reusable password validation
+- Seed script using `NestFactory.createApplicationContext`
+- All lint rules passing (no `any`, no unused imports, promises handled)
 
 ### Next steps (pick any):
-1. Create products module (entity, service, controller)
-2. Create orders module
-3. Create payments module
-4. Create files module
-5. Add pagination/filtering/sorting (Phase 5)
-6. Add Swagger (Phase 5)
+1. Products module (entity, service, controller, CRUD)
+2. Orders module (entity, service, controller, status management)
+3. Payments module (webhook endpoint)
+4. Files module (upload + metadata)
+5. Pagination / Filtering / Sorting (Phase 5)
+6. Caching / Cron / Events (Phase 5)
+7. Tests (Phase 6)
 
 ## How to Use This Document
 
 - **Starting fresh**: Pick the first unchecked task from Phase 1.
 - **Continuing work**: Check `Done` column to find the next task.
 - **Each agent**: Update this file after completing a task — mark it `[x]` and optionally add notes.
-- **Swagger decorators**: Every new controller must include `@ApiTags()`, every endpoint must include `@ApiOperation()`, and authenticated endpoints must include `@ApiBearerAuth()`.
-- **DTOs**: Every DTO property must include `@ApiProperty()` with an `example` value for Swagger schema generation.
+- **Swagger**: Every controller needs `@ApiTags()`, every endpoint needs `@ApiOperation()`, authenticated endpoints need `@ApiBearerAuth()`.
+- **DTOs**: Every DTO property needs `@ApiProperty({ example: '...' })`.
+- **Password validation**: Use `REGEX.PASSWORD` from `common/constants/regex.constant.ts` — never inline the regex.
+- **Service injection**: Use `@Inject(TOKEN)` with interface type — never inject a service class directly.
 - **If you get stuck**: Add a note in the Notes column and move to the next task.
 
 ## Commands
