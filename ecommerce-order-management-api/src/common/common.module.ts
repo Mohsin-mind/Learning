@@ -1,8 +1,9 @@
 import { ClassSerializerInterceptor, Global, Module } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './interceptors/response-transform.interceptor';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Global()
 @Module({
@@ -10,6 +11,10 @@ import { ResponseTransformInterceptor } from './interceptors/response-transform.
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_INTERCEPTOR,

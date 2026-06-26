@@ -103,26 +103,26 @@ src/
 
 ### Phase 5 — Advanced Features
 
-| #   | Task                                 | Done | Notes                                                                           |
-| --- | ------------------------------------ | ---- | ------------------------------------------------------------------------------- |
-| 5.1 | Pagination (offset-based)            |      |                                                                                 |
-| 5.2 | Filtering & Sorting                  |      |                                                                                 |
-| 5.3 | File upload endpoint                 |      |                                                                                 |
-| 5.4 | Caching layer                        |      |                                                                                 |
-| 5.5 | Cron jobs (e.g., clean stale orders) |      |                                                                                 |
-| 5.6 | EventEmitter for async flows         |      |                                                                                 |
-| 5.7 | Swagger / OpenAPI setup              | [x]  | Add @ApiTags, @ApiOperation, @ApiBearerAuth, @ApiProperty to every new endpoint |
-| 5.8 | Webhook simulation endpoint          |      |                                                                                 |
+| #   | Task                                 | Done | Notes                                                                                               |
+| --- | ------------------------------------ | ---- | --------------------------------------------------------------------------------------------------- |
+| 5.1 | Pagination (offset-based)            | [x]  | Products and Orders GET endpoints accept `?page=1&limit=10&sortBy=createdAt&sortOrder=DESC&search=` |
+| 5.2 | Filtering & Sorting                  | [x]  | Products support `search` on name/description; both support `sortBy`/`sortOrder`                    |
+| 5.3 | File upload endpoint                 | [x]  | POST /files/upload (authenticated, multer), GET /files/:id for metadata                             |
+| 5.4 | Caching layer                        | [x]  | In-memory cache with @nestjs/cache-manager (60s TTL, 100 items max)                                 |
+| 5.5 | Cron jobs (e.g., clean stale orders) | [x]  | Daily midnight cleanup of cancelled orders older than 30 days                                       |
+| 5.6 | EventEmitter for async flows         | [x]  | `order.created` and `payment.processed` events emitted                                              |
+| 5.7 | Swagger / OpenAPI setup              | [x]  | Add @ApiTags, @ApiOperation, @ApiBearerAuth, @ApiProperty to every new endpoint                     |
+| 5.8 | Webhook simulation endpoint          | [x]  | POST /payments/webhook with signature, updates order status + creates payment record                |
 
 ### Phase 6 — Testing
 
-| #   | Task                                    | Done | Notes |
-| --- | --------------------------------------- | ---- | ----- |
-| 6.1 | Unit tests for services                 |      |       |
-| 6.2 | Unit tests for controllers              |      |       |
-| 6.3 | Unit tests for guards / pipes / filters |      |       |
-| 6.4 | E2E tests for auth endpoints            |      |       |
-| 6.5 | E2E tests for CRUD endpoints            |      |       |
+| #   | Task                                    | Done | Notes                                                          |
+| --- | --------------------------------------- | ---- | -------------------------------------------------------------- |
+| 6.1 | Unit tests for services                 | [x]  | ProductsService, OrdersService, AuthService — 10 tests passing |
+| 6.2 | Unit tests for controllers              |      |                                                                |
+| 6.3 | Unit tests for guards / pipes / filters |      |                                                                |
+| 6.4 | E2E tests for auth endpoints            |      |                                                                |
+| 6.5 | E2E tests for CRUD endpoints            |      |                                                                |
 
 ## API Endpoints
 

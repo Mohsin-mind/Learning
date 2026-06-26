@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderRepository } from './order.repository';
 import { ProductRepository } from '../products/product.repository';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
 import { IOrdersService } from './interfaces/orders-service.interface';
 
 @Injectable()
@@ -10,6 +13,7 @@ export class OrdersService implements IOrdersService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly productRepository: ProductRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(
@@ -50,14 +54,45 @@ export class OrdersService implements IOrdersService {
     order.status = OrderStatus.PENDING;
     order.items = orderItems;
 
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    this.eventEmitter.emit('order.created', { orderId: savedOrder.id, userId });
+
+    return savedOrder;
   }
 
-  async findByUser(userId: string): Promise<Order[]> {
-    return this.orderRepository.find({
-      where: { userId },
-      relations: { items: true },
-    });
+  async findByUser(userId: string, query: PaginationQueryDto): Promise<PaginatedResult<Order>> {
+    const { page = 1, limit = 10, sortBy, sortOrder = 'DESC' } = query;
+
+    const queryBuilder = this.orderRepository.createQueryBuilder('order');
+    queryBuilder.leftJoinAndSelect('order.items', 'items');
+    queryBuilder.where('order.userId = :userId', { userId });
+
+    const allowedSortFields = ['status', 'total', 'createdAt', 'updatedAt'];
+    const orderField =
+      sortBy && allowedSortFields.includes(sortBy) ? `order.${sortBy}` : 'order.createdAt';
+    const order = sortOrder;
+
+    queryBuilder.orderBy(orderField, order);
+
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   async findById(id: string): Promise<Order | null> {

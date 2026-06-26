@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { authConfig } from '../config/auth.config';
+import { AUTH_SERVICE_TOKEN } from './interfaces/auth-service.interface';
 
 @Module({
   imports: [
@@ -23,7 +24,13 @@ import { authConfig } from '../config/auth.config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [JwtStrategy, PassportModule],
+  providers: [
+    {
+      provide: AUTH_SERVICE_TOKEN,
+      useClass: AuthService,
+    },
+    JwtStrategy,
+  ],
+  exports: [AUTH_SERVICE_TOKEN, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

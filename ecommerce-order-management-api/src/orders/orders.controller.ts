@@ -1,14 +1,13 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { IOrdersService } from './interfaces/orders-service.interface';
 import { ORDERS_SERVICE_TOKEN } from './interfaces/orders-service.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User, UserRole } from '../users/entities/user.entity';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
+import { User } from '../users/entities/user.entity';
+import { Admin } from '../common/decorators/admin.decorator';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -19,7 +18,6 @@ export class OrdersController {
   ) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create an order' })
   create(@CurrentUser() user: User, @Body() dto: CreateOrderDto) {
@@ -27,25 +25,21 @@ export class OrdersController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: "List current user's orders" })
-  findByUser(@CurrentUser() user: User) {
-    return this.ordersService.findByUser(user.id);
+  @ApiOperation({ summary: "List current user's orders with pagination and sorting" })
+  findByUser(@CurrentUser() user: User, @Query() query: PaginationQueryDto) {
+    return this.ordersService.findByUser(user.id, query);
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order by ID' })
   findOne(@CurrentUser() user: User, @Param('id') id: string) {
     return this.ordersService.findById(id);
   }
 
+  @Admin()
   @Patch(':id/status')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(UserRole.ADMIN)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update order status (admin only)' })
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto.status);
