@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
 
 export class CreateOrdersAndOrderItemsTables1762000000000 implements MigrationInterface {
   name = 'CreateOrdersAndOrderItemsTables1762000000000';
@@ -24,7 +24,7 @@ export class CreateOrdersAndOrderItemsTables1762000000000 implements MigrationIn
             name: 'status',
             type: 'enum',
             enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'],
-            enumName: 'order_status_enum',
+            enumName: 'orders_status_enum',
             default: `'pending'`,
           },
           {
@@ -46,14 +46,6 @@ export class CreateOrdersAndOrderItemsTables1762000000000 implements MigrationIn
         ],
       }),
       true,
-    );
-
-    await queryRunner.createIndex(
-      'orders',
-      new TableIndex({
-        name: 'IDX_ORDERS_USER_ID',
-        columnNames: ['userId'],
-      }),
     );
 
     await queryRunner.createForeignKey(

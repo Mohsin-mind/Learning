@@ -15,6 +15,6 @@ import { ProductsModule } from '../products/products.module';
     },
     OrderRepository,
   ],
-  exports: [ORDERS_SERVICE_TOKEN],
+  exports: [ORDERS_SERVICE_TOKEN, OrderRepository],
 })
 export class OrdersModule {}

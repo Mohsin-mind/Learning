@@ -72,6 +72,6 @@ export class ProductsService implements IProductsService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    await this.productRepository.remove(product);
+    await this.productRepository.softRemove(product);
   }
 }

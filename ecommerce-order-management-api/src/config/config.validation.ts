@@ -12,4 +12,6 @@ export const configValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().default('7d'),
   PORT: Joi.number().default(3000),
+  CACHE_TTL: Joi.number().default(60000),
+  CACHE_MAX: Joi.number().default(100),
 });

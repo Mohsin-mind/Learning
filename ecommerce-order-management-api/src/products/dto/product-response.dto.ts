@@ -17,6 +17,12 @@ export class ProductResponseDto {
   stock: number;
 
   @ApiProperty()
+  inStock: boolean;
+
+  @ApiProperty()
+  formattedPrice: string;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()

@@ -1,5 +1,18 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
+import { CacheInterceptor, CacheKey, CacheTTL, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Admin } from '../common/decorators/admin.decorator';
@@ -10,14 +23,19 @@ import { PRODUCTS_SERVICE_TOKEN } from './interfaces/products-service.interface'
 
 @ApiTags('Products')
 @Controller('products')
+@UseInterceptors(CacheInterceptor)
 export class ProductsController {
   constructor(
     @Inject(PRODUCTS_SERVICE_TOKEN)
     private readonly productsService: IProductsService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
 
   @Public()
   @Get()
+  @CacheKey('products-all')
+  @CacheTTL(30_000)
   @ApiOperation({ summary: 'List all products with pagination, filtering, and sorting' })
   findAll(@Query() query: PaginationQueryDto) {
     return this.productsService.findAll(query);
@@ -33,21 +51,26 @@ export class ProductsController {
   @Admin()
   @Post()
   @ApiOperation({ summary: 'Create a product (admin only)' })
-  create(@Body() dto: CreateProductDto) {
-    return this.productsService.create(dto);
+  async create(@Body() dto: CreateProductDto) {
+    const product = await this.productsService.create(dto);
+    await this.cacheManager.clear();
+    return product;
   }
 
   @Admin()
   @Patch(':id')
   @ApiOperation({ summary: 'Update a product (admin only)' })
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
-    return this.productsService.update(id, dto);
+  async update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+    const product = await this.productsService.update(id, dto);
+    await this.cacheManager.clear();
+    return product;
   }
 
   @Admin()
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product (admin only)' })
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.productsService.remove(id);
+    await this.cacheManager.clear();
   }
 }

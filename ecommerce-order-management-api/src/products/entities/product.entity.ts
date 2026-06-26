@@ -1,9 +1,12 @@
+import { Expose } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  VersionColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 
 @Entity('products')
@@ -28,4 +31,20 @@ export class Product {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @VersionColumn({ default: 1 })
+  version: number;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
+
+  @Expose()
+  get inStock(): boolean {
+    return this.stock > 0;
+  }
+
+  @Expose()
+  get formattedPrice(): string {
+    return `$${Number(this.price).toFixed(2)}`;
+  }
 }

@@ -6,16 +6,22 @@ import {
   Logger,
   HttpException,
   HttpStatus,
+  Inject,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { randomUUID } from 'node:crypto';
 import { Observable, tap } from 'rxjs';
+import { REQUEST_ID_TOKEN } from '../constants/di-tokens.constant';
 
 const INTERNAL_SERVER_ERROR_STATUS = 500;
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger(LoggingInterceptor.name);
+
+  constructor(
+    @Inject(REQUEST_ID_TOKEN)
+    private readonly generateRequestId: () => string,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const http = context.switchToHttp();
@@ -55,9 +61,9 @@ export class LoggingInterceptor implements NestInterceptor {
     const requestId = request.headers['x-request-id'];
 
     if (Array.isArray(requestId)) {
-      return requestId[0] ?? randomUUID();
+      return requestId[0] ?? this.generateRequestId();
     }
 
-    return requestId ?? randomUUID();
+    return requestId ?? this.generateRequestId();
   }
 }

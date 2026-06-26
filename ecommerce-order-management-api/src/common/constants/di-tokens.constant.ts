@@ -1,0 +1,2 @@
+export const REQUEST_ID_TOKEN = 'REQUEST_ID_TOKEN';
+export const APP_VERSION_TOKEN = 'APP_VERSION_TOKEN';

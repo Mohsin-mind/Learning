@@ -15,6 +15,10 @@ describe('ProductsService', () => {
     stock: 10,
     createdAt: new Date(),
     updatedAt: new Date(),
+    version: 1,
+    deletedAt: null,
+    inStock: true,
+    formattedPrice: '$29.99',
   };
 
   beforeEach(async () => {
@@ -28,6 +32,7 @@ describe('ProductsService', () => {
             save: jest.fn().mockResolvedValue(mockProduct),
             findOne: jest.fn().mockResolvedValue(mockProduct),
             remove: jest.fn().mockResolvedValue(mockProduct),
+            softRemove: jest.fn().mockResolvedValue(mockProduct),
             createQueryBuilder: jest.fn(),
           },
         },

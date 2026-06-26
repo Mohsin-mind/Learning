@@ -45,6 +45,16 @@ export class CreateProductsTable1761000000000 implements MigrationInterface {
             type: 'timestamp',
             default: 'now()',
           },
+          {
+            name: 'version',
+            type: 'int',
+            default: 1,
+          },
+          {
+            name: 'deletedAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
         ],
       }),
       true,

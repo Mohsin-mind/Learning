@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
@@ -14,6 +15,7 @@ export class OrdersService implements IOrdersService {
     private readonly orderRepository: OrderRepository,
     private readonly productRepository: ProductRepository,
     private readonly eventEmitter: EventEmitter2,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(
@@ -24,41 +26,57 @@ export class OrdersService implements IOrdersService {
       throw new BadRequestException('Order must contain at least one item');
     }
 
-    const orderItems: OrderItem[] = [];
-    let total = 0;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    for (const item of dto.items) {
-      const product = await this.productRepository.findOne({
-        where: { id: item.productId },
-      });
-      if (!product) {
-        throw new NotFoundException(`Product ${item.productId} not found`);
+    try {
+      const orderItems: OrderItem[] = [];
+      let total = 0;
+
+      for (const item of dto.items) {
+        const product = await queryRunner.manager.findOne(this.productRepository.target, {
+          where: { id: item.productId },
+        });
+        if (!product) {
+          throw new NotFoundException(`Product ${item.productId} not found`);
+        }
+        if (product.stock < item.quantity) {
+          throw new BadRequestException(`Insufficient stock for product ${product.name}`);
+        }
+
+        product.stock -= item.quantity;
+        await queryRunner.manager.save(product);
+
+        const orderItem = new OrderItem();
+        orderItem.productId = product.id;
+        orderItem.productName = product.name;
+        orderItem.price = Number(product.price);
+        orderItem.quantity = item.quantity;
+        orderItems.push(orderItem);
+
+        total += Number(product.price) * item.quantity;
       }
-      if (product.stock < item.quantity) {
-        throw new BadRequestException(`Insufficient stock for product ${product.name}`);
-      }
 
-      const orderItem = new OrderItem();
-      orderItem.productId = product.id;
-      orderItem.productName = product.name;
-      orderItem.price = Number(product.price);
-      orderItem.quantity = item.quantity;
-      orderItems.push(orderItem);
+      const order = new Order();
+      order.userId = userId;
+      order.total = total;
+      order.status = OrderStatus.PENDING;
+      order.items = orderItems;
 
-      total += Number(product.price) * item.quantity;
+      const savedOrder = await queryRunner.manager.save(order);
+
+      await queryRunner.commitTransaction();
+
+      this.eventEmitter.emit('order.created', { orderId: savedOrder.id, userId });
+
+      return savedOrder;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    const order = new Order();
-    order.userId = userId;
-    order.total = total;
-    order.status = OrderStatus.PENDING;
-    order.items = orderItems;
-
-    const savedOrder = await this.orderRepository.save(order);
-
-    this.eventEmitter.emit('order.created', { orderId: savedOrder.id, userId });
-
-    return savedOrder;
   }
 
   async findByUser(userId: string, query: PaginationQueryDto): Promise<PaginatedResult<Order>> {
