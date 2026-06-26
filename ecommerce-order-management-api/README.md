@@ -196,14 +196,23 @@ http://localhost:3000/api/docs
 
 ## API Endpoints
 
-| Method | Path                    | Description                        |
-| ------ | ----------------------- | ---------------------------------- |
-| GET    | `/`                     | Health check                       |
-| GET    | `/health/live`          | Liveness check                     |
-| GET    | `/health/ready`         | Readiness check with database ping |
-| POST   | `/api/v1/auth/register` | Create account                     |
-| POST   | `/api/v1/auth/login`    | Login, returns JWT                 |
-| GET    | `/api/v1/auth/profile`  | Current user profile (auth)        |
+| Method | Path                        | Description                        |
+| ------ | --------------------------- | ---------------------------------- |
+| GET    | `/`                         | Health check                       |
+| GET    | `/health/live`              | Liveness check                     |
+| GET    | `/health/ready`             | Readiness check with database ping |
+| POST   | `/api/v1/auth/register`     | Create account                     |
+| POST   | `/api/v1/auth/login`        | Login, returns JWT                 |
+| GET    | `/api/v1/auth/profile`      | Current user profile (auth)        |
+| GET    | `/api/v1/products`          | List all products                  |
+| POST   | `/api/v1/products`          | Create product (admin)             |
+| GET    | `/api/v1/products/:id`      | Get product by ID                  |
+| PATCH  | `/api/v1/products/:id`      | Update product (admin)             |
+| DELETE | `/api/v1/products/:id`      | Delete product (admin)             |
+| POST   | `/api/v1/orders`            | Create order (auth)                |
+| GET    | `/api/v1/orders`            | List my orders (auth)              |
+| GET    | `/api/v1/orders/:id`        | Get order by ID (auth)             |
+| PATCH  | `/api/v1/orders/:id/status` | Update order status (admin)        |
 
 ## Progress Tracking
 

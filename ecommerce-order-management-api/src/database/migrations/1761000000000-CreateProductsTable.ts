@@ -1,14 +1,12 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateUsersTable1760000000000 implements MigrationInterface {
-  name = 'CreateUsersTable1760000000000';
+export class CreateProductsTable1761000000000 implements MigrationInterface {
+  name = 'CreateProductsTable1761000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
-
     await queryRunner.createTable(
       new Table({
-        name: 'users',
+        name: 'products',
         columns: [
           {
             name: 'id',
@@ -19,24 +17,23 @@ export class CreateUsersTable1760000000000 implements MigrationInterface {
             default: 'uuid_generate_v4()',
           },
           {
-            name: 'email',
-            type: 'varchar',
-            isUnique: true,
-          },
-          {
-            name: 'password',
-            type: 'varchar',
-          },
-          {
             name: 'name',
             type: 'varchar',
           },
           {
-            name: 'role',
-            type: 'enum',
-            enum: ['user', 'admin'],
-            enumName: 'user_role_enum',
-            default: `'user'`,
+            name: 'description',
+            type: 'text',
+          },
+          {
+            name: 'price',
+            type: 'decimal',
+            precision: 10,
+            scale: 2,
+          },
+          {
+            name: 'stock',
+            type: 'int',
+            default: 0,
           },
           {
             name: 'createdAt',
@@ -52,17 +49,9 @@ export class CreateUsersTable1760000000000 implements MigrationInterface {
       }),
       true,
     );
-
-    await queryRunner.createIndex(
-      'users',
-      new TableIndex({
-        name: 'IDX_USERS_EMAIL',
-        columnNames: ['email'],
-      }),
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('users');
+    await queryRunner.dropTable('products');
   }
 }

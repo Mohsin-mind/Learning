@@ -92,13 +92,14 @@ src/
 | #   | Task                                                       | Done | Notes                                                                           |
 | --- | ---------------------------------------------------------- | ---- | ------------------------------------------------------------------------------- |
 | 4.1 | Install TypeORM + PostgreSQL driver                        | [x]  | typeorm + pg installed                                                          |
-| 4.2 | Create entities (User, Product, Order, OrderItem, Payment) | [~]  | User entity done (with role field + @Exclude on password); others pending       |
+| 4.2 | Create entities (User, Product, Order, OrderItem, Payment) | [~]  | User, Product, Order, OrderItem done; Payment pending                           |
 | 4.3 | Create database module with connection                     | [x]  | DatabaseModule with async config; `DB_SYNCHRONIZE` defaults false               |
 | 4.4 | TypeORM repositories in services                           | [x]  | Custom `UserRepository` extends Repository; no `@InjectRepository`              |
 | 4.5 | User registration endpoint                                 | [x]  | POST /auth/register                                                             |
 | 4.6 | User login with JWT token                                  | [x]  | POST /auth/login                                                                |
 | 4.7 | Admin / User role-based authorization                      | [x]  | RolesGuard + UserRole enum + @Roles()                                           |
 | 4.8 | Configure TypeORM migrations                               | [x]  | `src/database/data-source.ts`, `src/database/migrations`, and migration scripts |
+| 4.9 | Create migrations for new entities                         | [x]  | Users, Products, Orders + OrderItems migrations created                         |
 
 ### Phase 5 — Advanced Features
 
@@ -136,20 +137,20 @@ GET  /auth/profile     # Get current user profile (authenticated)  ✅
 ### Products
 
 ```
-GET    /products       # List products (public, with pagination/filtering/sorting)
-POST   /products       # Create product (admin only)
-GET    /products/:id   # Get single product
-PATCH  /products/:id   # Update product (admin only)
-DELETE /products/:id   # Delete product (admin only)
+GET    /products       # List products (public, with pagination/filtering/sorting)  ✅
+POST   /products       # Create product (admin only)                               ✅
+GET    /products/:id   # Get single product                                        ✅
+PATCH  /products/:id   # Update product (admin only)                               ✅
+DELETE /products/:id   # Delete product (admin only)                               ✅
 ```
 
 ### Orders
 
 ```
-POST   /orders         # Create order (authenticated)
-GET    /orders         # List user's orders (authenticated, with pagination)
-GET    /orders/:id     # Get order detail (owner or admin)
-PATCH  /orders/:id/status  # Update order status (admin only)
+POST   /orders         # Create order (authenticated)                         ✅
+GET    /orders         # List user's orders (authenticated, with pagination)  ✅
+GET    /orders/:id     # Get order detail (owner or admin)                    ✅
+PATCH  /orders/:id/status  # Update order status (admin only)                ✅
 ```
 
 ### Payments
@@ -178,6 +179,7 @@ GET /users/:id          # Get user detail (admin only)
 
 ### What's built so far:
 
+- Products module with full CRUD (entity, repository, service, controller)
 - Typed ConfigModule with env file + Joi validation
 - DatabaseModule with async TypeORM connection (PostgreSQL) and migration data source
 - `User` entity with `UserRole` enum, `@Exclude()` on password
@@ -208,8 +210,8 @@ GET /users/:id          # Get user detail (admin only)
 
 ### Next steps (pick any):
 
-1. Products module (entity, service, controller, CRUD)
-2. Orders module (entity, service, controller, status management)
+1. ~~Products module (entity, service, controller, CRUD)~~ ✅
+2. ~~Orders module (entity, service, controller, status management)~~ ✅
 3. Payments module (webhook endpoint)
 4. Files module (upload + metadata)
 5. Pagination / Filtering / Sorting (Phase 5)
@@ -224,8 +226,20 @@ GET /users/:id          # Get user detail (admin only)
 - **Swagger**: Every controller needs `@ApiTags()`, every endpoint needs `@ApiOperation()`, authenticated endpoints need `@ApiBearerAuth()`.
 - **DTOs**: Every DTO property needs `@ApiProperty({ example: '...' })`.
 - **Password validation**: Use `REGEX.PASSWORD` from `common/constants/regex.constant.ts` — never inline the regex.
-- **Service injection**: Use `@Inject(TOKEN)` with interface type — never inject a service class directly.
 - **If you get stuck**: Add a note in the Notes column and move to the next task.
+
+### New Module Checklist (mandatory)
+
+Before writing any new module, re-read the `users/` module as the reference. Every feature module must follow this exact pattern:
+
+1. **Entity** → `entities/feature.entity.ts` — TypeORM columns, no sensitive fields exposed
+2. **Repository** → `feature.repository.ts` — extends `Repository<Entity>`, injects `DataSource`
+3. **Interface + Token** → `interfaces/feature-service.interface.ts` — exports `IFeatureService` + `FEATURE_SERVICE_TOKEN`
+4. **Service** → `feature.service.ts` — `implements IFeatureService`, injects repository
+5. **Module** → `feature.module.ts` — provider uses `{ provide: TOKEN, useClass: Service }` + repository; no duplicate class provider; exports only the token
+6. **Controller** → `feature.controller.ts` — injects via `@Inject(TOKEN) private readonly service: IFeatureService`; use `import type` for the interface
+7. **DTOs** → `dto/create.dto.ts`, `dto/update.dto.ts` — validation + `@ApiProperty()` on every field
+8. **Migration** → run `pnpm migration:generate src/database/migrations/CreateName` after creating entities, then verify the generated file
 
 ## Commands
 
@@ -234,8 +248,8 @@ pnpm run dev          # development with watch
 pnpm run debug        # debug with watch
 pnpm run prod         # production (runs compiled dist/main)
 pnpm run seed         # seed DB with admin + user accounts
-pnpm migration:generate -- src/database/migrations/CreateName
-pnpm migration:create -- src/database/migrations/CreateName
+pnpm migration:generate src/database/migrations/CreateName
+pnpm migration:create src/database/migrations/CreateName
 pnpm migration:run    # run pending migrations
 pnpm migration:revert # revert last migration
 pnpm run test         # unit tests

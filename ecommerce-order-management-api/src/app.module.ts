@@ -5,8 +5,19 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
+import { ProductsModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
-  imports: [ConfigModule, DatabaseModule, AuthModule, UsersModule, CommonModule, HealthModule],
+  imports: [
+    ConfigModule,
+    DatabaseModule,
+    AuthModule,
+    UsersModule,
+    CommonModule,
+    HealthModule,
+    ProductsModule,
+    OrdersModule,
+  ],
 })
 export class AppModule {}
