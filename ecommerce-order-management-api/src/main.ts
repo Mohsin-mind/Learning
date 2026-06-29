@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import helmet from 'helmet';
+import compression from 'compression';
 import { AppModule } from './app.module';
 import { appConfig } from './config/app.config';
 
@@ -9,6 +11,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = app.get<ConfigType<typeof appConfig>>(appConfig.KEY);
+
+  app.use(helmet());
+  app.use(compression());
 
   app.setGlobalPrefix('api/v1', {
     exclude: ['/', 'health/live', 'health/ready'],

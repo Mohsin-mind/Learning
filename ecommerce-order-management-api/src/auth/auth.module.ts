@@ -16,10 +16,7 @@ import { AUTH_SERVICE_TOKEN } from './interfaces/auth-service.interface';
     JwtModule.registerAsync({
       inject: [authConfig.KEY],
       useFactory: (config: ConfigType<typeof authConfig>) => ({
-        secret: config.jwtSecret,
-        signOptions: {
-          expiresIn: config.jwtExpiresIn as unknown as number,
-        },
+        secret: config.jwtAccessSecret,
       }),
     }),
   ],

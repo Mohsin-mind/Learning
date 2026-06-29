@@ -1,9 +1,10 @@
 import { ClassSerializerInterceptor, Global, Module } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { randomUUID } from 'node:crypto';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './interceptors/response-transform.interceptor';
+import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { REQUEST_ID_TOKEN, APP_VERSION_TOKEN } from './constants/di-tokens.constant';
 
@@ -28,7 +29,12 @@ import { REQUEST_ID_TOKEN, APP_VERSION_TOKEN } from './constants/di-tokens.const
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ClassSerializerInterceptor,
+      useClass: PerformanceInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: (reflector: Reflector) => new ClassSerializerInterceptor(reflector),
+      inject: [Reflector],
     },
     {
       provide: REQUEST_ID_TOKEN,

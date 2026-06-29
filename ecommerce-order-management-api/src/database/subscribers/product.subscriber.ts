@@ -16,9 +16,11 @@ export class ProductSubscriber implements EntitySubscriberInterface<Product> {
   }
 
   beforeUpdate(event: UpdateEvent<Product>) {
-    if (event.entity && event.databaseEntity) {
-      const oldStock = event.databaseEntity.stock;
-      const entity = event.entity as Product;
+    const entity = event.entity as Product | undefined;
+    const databaseEntity = event.databaseEntity as Product | undefined;
+
+    if (entity && databaseEntity) {
+      const oldStock = databaseEntity.stock;
       const newStock = entity.stock;
       if (oldStock !== newStock) {
         this.logger.log(`Stock changed for "${entity.name}": ${oldStock} -> ${newStock}`);

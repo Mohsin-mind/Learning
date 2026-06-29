@@ -13,7 +13,6 @@ export class HealthController {
     return {
       status: 'ok',
       uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
     };
   }
 
@@ -42,7 +41,6 @@ export class HealthController {
       checks: {
         database: 'up',
       },
-      timestamp: new Date().toISOString(),
     };
   }
 }

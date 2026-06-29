@@ -12,7 +12,7 @@ const nodeEnv = process.env.NODE_ENV || 'development';
   imports: [
     NestConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`.env.${nodeEnv}`, '.env'],
+      envFilePath: `.env.${nodeEnv}`,
       load: [appConfig, authConfig, databaseConfig, cacheConfig],
       validationSchema: configValidationSchema,
       ignoreEnvVars: false,

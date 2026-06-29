@@ -10,7 +10,7 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { CacheInterceptor, CacheKey, CacheTTL, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheTTL, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -23,7 +23,6 @@ import { PRODUCTS_SERVICE_TOKEN } from './interfaces/products-service.interface'
 
 @ApiTags('Products')
 @Controller('products')
-@UseInterceptors(CacheInterceptor)
 export class ProductsController {
   constructor(
     @Inject(PRODUCTS_SERVICE_TOKEN)
@@ -34,8 +33,8 @@ export class ProductsController {
 
   @Public()
   @Get()
-  @CacheKey('products-all')
-  @CacheTTL(30_000)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1 * 60 * 1000) // 1 minute
   @ApiOperation({ summary: 'List all products with pagination, filtering, and sorting' })
   findAll(@Query() query: PaginationQueryDto) {
     return this.productsService.findAll(query);
@@ -72,5 +71,6 @@ export class ProductsController {
   async remove(@Param('id') id: string) {
     await this.productsService.remove(id);
     await this.cacheManager.clear();
+    return null;
   }
 }

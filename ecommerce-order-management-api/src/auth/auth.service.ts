@@ -1,11 +1,14 @@
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { authConfig } from '../config/auth.config';
 import type { IUsersService } from '../users/interfaces/users-service.interface';
 import { USERS_SERVICE_TOKEN } from '../users/interfaces/users-service.interface';
 import type { IAuthService } from './interfaces/auth-service.interface';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
@@ -14,6 +17,8 @@ export class AuthService implements IAuthService {
     @Inject(USERS_SERVICE_TOKEN)
     private readonly usersService: IUsersService,
     private readonly jwtService: JwtService,
+    @Inject(authConfig.KEY)
+    private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
@@ -29,8 +34,7 @@ export class AuthService implements IAuthService {
       name: dto.name,
     });
 
-    const token = this.generateToken(user);
-    return AuthResponseDto.fromUser(user, token);
+    return AuthResponseDto.fromUser(user, this.generateTokens(user));
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -44,12 +48,38 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = this.generateToken(user);
-    return AuthResponseDto.fromUser(user, token);
+    return AuthResponseDto.fromUser(user, this.generateTokens(user));
   }
 
-  private generateToken(user: { id: string; email: string }) {
+  async refresh(dto: RefreshTokenDto): Promise<AuthResponseDto> {
+    try {
+      const payload = this.jwtService.verify<{ sub: string; email: string }>(dto.refreshToken, {
+        secret: this.config.jwtRefreshSecret,
+      });
+
+      const user = await this.usersService.findById(payload.sub);
+      if (!user) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      return AuthResponseDto.fromUser(user, this.generateTokens(user));
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
+  private generateTokens(user: { id: string; email: string }) {
     const payload = { sub: user.id, email: user.email };
-    return this.jwtService.sign(payload);
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: this.config.jwtAccessExpiresIn as never,
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.config.jwtRefreshSecret,
+      expiresIn: this.config.jwtRefreshExpiresIn as never,
+    });
+
+    return { accessToken, refreshToken };
   }
 }

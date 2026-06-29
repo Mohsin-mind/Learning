@@ -7,12 +7,19 @@ export class AuthResponseDto {
   user: UserResponseDto;
 
   @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-  token: string;
+  accessToken: string;
 
-  static fromUser(user: User, token: string): AuthResponseDto {
+  @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+  refreshToken: string;
+
+  static fromUser(
+    user: User,
+    tokens: { accessToken: string; refreshToken: string },
+  ): AuthResponseDto {
     return {
       user: UserResponseDto.fromEntity(user),
-      token,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     };
   }
 }

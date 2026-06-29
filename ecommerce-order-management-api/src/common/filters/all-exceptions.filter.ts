@@ -15,6 +15,7 @@ interface ErrorResponseBody {
   message: string[];
   error: string;
   path: string;
+  data: null;
   requestId?: string;
   timestamp: string;
 }
@@ -40,6 +41,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message: this.getMessages(exception),
       error: this.getErrorName(exception, status),
       path: request.originalUrl,
+      data: null,
       requestId,
       timestamp: new Date().toISOString(),
     };
