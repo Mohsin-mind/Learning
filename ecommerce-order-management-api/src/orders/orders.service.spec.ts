@@ -130,6 +130,8 @@ describe('OrdersService', () => {
       expect(eventEmitter.emit).toHaveBeenCalledWith('order.created', {
         orderId: 'order-1',
         userId: 'user-1',
+        total: 59.98,
+        itemCount: 1,
       });
     });
 

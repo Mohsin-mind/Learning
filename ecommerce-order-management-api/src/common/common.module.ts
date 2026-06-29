@@ -1,12 +1,19 @@
-import { ClassSerializerInterceptor, Global, Module } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Global,
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+} from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
-import { randomUUID } from 'node:crypto';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './interceptors/response-transform.interceptor';
 import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { REQUEST_ID_TOKEN, APP_VERSION_TOKEN } from './constants/di-tokens.constant';
+import { RolesGuard } from './guards/roles.guard';
+import { APP_VERSION_TOKEN } from './constants/di-tokens.constant';
+import { RequestIdMiddleware } from './middleware/request-id.middleware';
 
 @Global()
 @Module({
@@ -18,6 +25,10 @@ import { REQUEST_ID_TOKEN, APP_VERSION_TOKEN } from './constants/di-tokens.const
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     {
       provide: APP_INTERCEPTOR,
@@ -37,14 +48,14 @@ import { REQUEST_ID_TOKEN, APP_VERSION_TOKEN } from './constants/di-tokens.const
       inject: [Reflector],
     },
     {
-      provide: REQUEST_ID_TOKEN,
-      useFactory: () => () => randomUUID(),
-    },
-    {
       provide: APP_VERSION_TOKEN,
       useValue: '1.0.0',
     },
   ],
-  exports: [REQUEST_ID_TOKEN, APP_VERSION_TOKEN],
+  exports: [APP_VERSION_TOKEN],
 })
-export class CommonModule {}
+export class CommonModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}

@@ -12,12 +12,17 @@ export class PerformanceInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest<Request>();
     const start = Date.now();
 
+    const logIfSlow = () => {
+      const duration = Date.now() - start;
+      if (duration > SLOW_THRESHOLD_MS) {
+        this.logger.warn(`SLOW REQUEST [${duration}ms] ${request.method} ${request.url}`);
+      }
+    };
+
     return next.handle().pipe(
-      tap(() => {
-        const duration = Date.now() - start;
-        if (duration > SLOW_THRESHOLD_MS) {
-          this.logger.warn(`SLOW REQUEST [${duration}ms] ${request.method} ${request.url}`);
-        }
+      tap({
+        next: logIfSlow,
+        error: logIfSlow,
       }),
     );
   }

@@ -111,7 +111,9 @@ describe('PaymentsService', () => {
         success: false,
       });
 
-      expect(mockOrderRepository.save).not.toHaveBeenCalled();
+      expect(mockOrderRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ status: OrderStatus.CANCELLED }),
+      );
       expect(result.status).toBe(PaymentStatus.FAILED);
       expect(mockEventEmitter.emit).toHaveBeenCalledWith('payment.processed', {
         orderId: 'order-1',

@@ -25,10 +25,11 @@ export class PaymentsService implements IPaymentsService {
       throw new NotFoundException('Order not found');
     }
 
-    if (payload.success) {
-      order.status = OrderStatus.CONFIRMED;
-      await this.orderRepository.save(order);
-    }
+    // Saga compensating transaction: always update order status whether payment
+    // succeeded or failed. A failed payment cancels the order so it is never
+    // left stuck in PENDING.
+    order.status = payload.success ? OrderStatus.CONFIRMED : OrderStatus.CANCELLED;
+    await this.orderRepository.save(order);
 
     const payment = this.paymentRepository.create({
       orderId: payload.orderId,

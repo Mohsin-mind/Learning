@@ -5,7 +5,6 @@ import { UserRepository } from './user.repository';
 import { USERS_SERVICE_TOKEN } from './interfaces/users-service.interface';
 
 @Module({
-  imports: [],
   controllers: [UsersController],
   providers: [
     {

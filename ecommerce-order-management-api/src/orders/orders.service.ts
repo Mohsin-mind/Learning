@@ -68,11 +68,24 @@ export class OrdersService implements IOrdersService {
 
       await queryRunner.commitTransaction();
 
-      this.eventEmitter.emit('order.created', { orderId: savedOrder.id, userId });
+      // Emit event AFTER the transaction commits so listeners work with
+      // persisted data. This is the "choreography-based Saga" pattern:
+      // each service reacts to domain events rather than being called directly.
+      this.eventEmitter.emit('order.created', {
+        orderId: savedOrder.id,
+        userId,
+        total: savedOrder.total,
+        itemCount: savedOrder.items.length,
+      });
 
       return savedOrder;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+
+      // Saga compensating event: if DB transaction rolled back, notify other
+      // parts of the system so they can compensate their own state as needed.
+      this.eventEmitter.emit('order.failed', { userId, reason: (error as Error).message });
+
       throw error;
     } finally {
       await queryRunner.release();

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
-import { IUsersService } from './interfaces/users-service.interface';
+import { CreateUserInput, IUsersService } from './interfaces/users-service.interface';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -15,7 +15,7 @@ export class UsersService implements IUsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async create(data: Partial<User>): Promise<User> {
+  async create(data: CreateUserInput): Promise<User> {
     const user = this.userRepository.create(data);
     return this.userRepository.save(user);
   }

@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { OrderRepository } from '../orders/order.repository';
+import { OrdersModule } from '../orders/orders.module';
 
 @Module({
-  providers: [TasksService, OrderRepository],
+  imports: [OrdersModule],
+  providers: [TasksService],
 })
 export class TasksModule {}
