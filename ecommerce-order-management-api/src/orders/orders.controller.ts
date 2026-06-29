@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { IOrdersService } from './interfaces/orders-service.interface';
 import { ORDERS_SERVICE_TOKEN } from './interfaces/orders-service.interface';
@@ -34,14 +44,14 @@ export class OrdersController {
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order by ID' })
-  findOne(@CurrentUser() user: User, @Param('id') id: string) {
+  findOne(@CurrentUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
     return this.ordersService.findById(id);
   }
 
   @Admin()
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update order status (admin only)' })
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+  updateStatus(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto.status);
   }
 }

@@ -6,6 +6,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -56,7 +57,7 @@ export class FilesController {
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get file metadata (authenticated)' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.filesService.findById(id);
   }
 }

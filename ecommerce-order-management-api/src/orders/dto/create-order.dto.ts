@@ -1,4 +1,4 @@
-import { IsArray, IsUUID, Min, IsInt, ValidateNested } from 'class-validator';
+import { IsArray, IsUUID, Min, IsInt, ValidateNested, ArrayNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -16,6 +16,7 @@ class OrderItemDto {
 export class CreateOrderDto {
   @ApiProperty({ type: [OrderItemDto] })
   @IsArray()
+  @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items: OrderItemDto[];

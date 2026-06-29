@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UseInterceptors,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CacheInterceptor, CacheTTL, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -43,7 +44,7 @@ export class ProductsController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get a product by ID' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.findById(id);
   }
 
@@ -59,7 +60,7 @@ export class ProductsController {
   @Admin()
   @Patch(':id')
   @ApiOperation({ summary: 'Update a product (admin only)' })
-  async update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateProductDto) {
     const product = await this.productsService.update(id, dto);
     await this.cacheManager.clear();
     return product;
@@ -68,7 +69,7 @@ export class ProductsController {
   @Admin()
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product (admin only)' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.productsService.remove(id);
     await this.cacheManager.clear();
     return null;
