@@ -5,8 +5,8 @@ import { ConfigType } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { UsersModule } from '../users/users.module';
-import { authConfig } from '../config/auth.config';
+import { UsersModule } from '@/users/users.module';
+import { authConfig } from '@/config/auth.config';
 import { AUTH_SERVICE_TOKEN } from './interfaces/auth-service.interface';
 
 @Module({

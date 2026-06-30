@@ -1,8 +1,8 @@
-import { Product } from '../entities/product.entity';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
-import { PaginatedResult } from '../../common/interfaces/paginated-result.interface';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Product } from '@/products/entities/product.entity';
+import { CreateProductDto } from '@/products/dto/create-product.dto';
+import { UpdateProductDto } from '@/products/dto/update-product.dto';
+import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 export interface IProductsService {
   create(dto: CreateProductDto): Promise<Product>;

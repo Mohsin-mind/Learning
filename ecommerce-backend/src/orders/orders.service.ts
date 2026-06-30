@@ -5,11 +5,11 @@ import { DataSource } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderRepository } from './order.repository';
-import { ProductRepository } from '../products/product.repository';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
+import { ProductRepository } from '@/products/product.repository';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
+import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
 import { IOrdersService } from './interfaces/orders-service.interface';
-import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
+import { QUEUES, ORDER_JOBS } from '@/common/constants/app.constants';
 
 @Injectable()
 export class OrdersService implements IOrdersService {
@@ -78,7 +78,7 @@ export class OrdersService implements IOrdersService {
 
       return savedOrder;
     } catch (error) {
-       // Saga compensating job: enqueue so the processor notifies the user
+      // Saga compensating job: enqueue so the processor notifies the user
       // even if the worker is temporarily down — it will retry.
       await this.orderQueue.add(ORDER_JOBS.FAILED, { userId, reason: (error as Error).message });
       throw error;

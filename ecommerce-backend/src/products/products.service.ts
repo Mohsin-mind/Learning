@@ -3,8 +3,8 @@ import { Product } from './entities/product.entity';
 import { ProductRepository } from './product.repository';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
+import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
 import { IProductsService } from './interfaces/products-service.interface';
 
 @Injectable()

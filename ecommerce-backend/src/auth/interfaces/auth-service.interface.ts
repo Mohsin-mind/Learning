@@ -1,7 +1,7 @@
-import { RegisterDto } from '../dto/register.dto';
-import { LoginDto } from '../dto/login.dto';
-import { RefreshTokenDto } from '../dto/refresh-token.dto';
-import { AuthResponseDto } from '../dto/auth-response.dto';
+import { RegisterDto } from '@/auth/dto/register.dto';
+import { LoginDto } from '@/auth/dto/login.dto';
+import { RefreshTokenDto } from '@/auth/dto/refresh-token.dto';
+import { AuthResponseDto } from '@/auth/dto/auth-response.dto';
 
 export interface IAuthService {
   register(dto: RegisterDto): Promise<AuthResponseDto>;

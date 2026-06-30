@@ -16,9 +16,9 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Admin } from '../common/decorators/admin.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { Public } from '../common/decorators/public.decorator';
+import { Admin } from '@/common/decorators/admin.decorator';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
+import { Public } from '@/common/decorators/public.decorator';
 import type { IProductsService } from './interfaces/products-service.interface';
 import { PRODUCTS_SERVICE_TOKEN } from './interfaces/products-service.interface';
 

@@ -1,6 +1,6 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Public } from '../common/decorators/public.decorator';
+import { Public } from '@/common/decorators/public.decorator';
 import type { IPaymentsService } from './interfaces/payments-service.interface';
 import { PAYMENTS_SERVICE_TOKEN } from './interfaces/payments-service.interface';
 import { WebhookPayloadDto } from './dto/webhook-payload.dto';

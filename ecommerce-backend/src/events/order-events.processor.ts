@@ -1,7 +1,7 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { QUEUES, ORDER_JOBS, WORKER_EVENTS } from '../common/constants/app.constants';
+import { QUEUES, ORDER_JOBS, WORKER_EVENTS } from '@/common/constants/app.constants';
 
 @Processor(QUEUES.ORDERS)
 export class OrderEventsProcessor extends WorkerHost {

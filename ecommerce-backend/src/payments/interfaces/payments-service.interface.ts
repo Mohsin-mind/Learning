@@ -1,4 +1,4 @@
-import { Payment } from '../entities/payment.entity';
+import { Payment } from '@/payments/entities/payment.entity';
 
 export interface IPaymentsService {
   handleWebhook(payload: {

@@ -3,10 +3,10 @@ import { getQueueToken } from '@nestjs/bullmq';
 import { NotFoundException } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentRepository } from './payment.repository';
-import { OrderRepository } from '../orders/order.repository';
+import { OrderRepository } from '@/orders/order.repository';
 import { Payment, PaymentStatus, PaymentProvider } from './entities/payment.entity';
-import { Order, OrderStatus } from '../orders/entities/order.entity';
-import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
+import { Order, OrderStatus } from '@/orders/entities/order.entity';
+import { QUEUES, ORDER_JOBS } from '@/common/constants/app.constants';
 
 describe('PaymentsService', () => {
   let service: PaymentsService;

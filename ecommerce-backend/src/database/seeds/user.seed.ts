@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import type { IUsersService } from '../../users/interfaces/users-service.interface';
-import { UserRole } from '../../users/entities/user.entity';
+import type { IUsersService } from '@/users/interfaces/users-service.interface';
+import { UserRole } from '@/users/entities/user.entity';
 
 const logger = new Logger('UserSeed');
 

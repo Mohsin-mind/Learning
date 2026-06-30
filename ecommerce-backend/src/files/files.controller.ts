@@ -15,8 +15,8 @@ import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import type { IFilesService } from './interfaces/files-service.interface';
 import { FILES_SERVICE_TOKEN } from './interfaces/files-service.interface';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from '../users/entities/user.entity';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { User } from '@/users/entities/user.entity';
 
 @ApiTags('Files')
 @Controller('files')

@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../../app.module';
-import { USERS_SERVICE_TOKEN } from '../../users/interfaces/users-service.interface';
-import type { IUsersService } from '../../users/interfaces/users-service.interface';
+import { AppModule } from '@/app.module';
+import { USERS_SERVICE_TOKEN } from '@/users/interfaces/users-service.interface';
+import type { IUsersService } from '@/users/interfaces/users-service.interface';
 import { userSeed } from './user.seed';
 
 async function bootstrap() {

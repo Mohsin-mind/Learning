@@ -1,4 +1,4 @@
-import { User, UserRole } from '../entities/user.entity';
+import { User, UserRole } from '@/users/entities/user.entity';
 
 export interface CreateUserInput {
   email: string;

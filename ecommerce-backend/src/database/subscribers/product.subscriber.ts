@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventSubscriber, EntitySubscriberInterface, UpdateEvent, InsertEvent } from 'typeorm';
-import { Product } from '../../products/entities/product.entity';
+import { Product } from '@/products/entities/product.entity';
 
 @Injectable()
 @EventSubscriber()

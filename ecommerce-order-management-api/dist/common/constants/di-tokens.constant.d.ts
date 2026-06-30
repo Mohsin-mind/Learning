@@ -1,1 +1,0 @@
-export declare const APP_VERSION_TOKEN = "APP_VERSION_TOKEN";

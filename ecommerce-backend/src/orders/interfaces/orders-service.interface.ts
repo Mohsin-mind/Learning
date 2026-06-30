@@ -1,6 +1,6 @@
-import { Order } from '../entities/order.entity';
-import { PaginatedResult } from '../../common/interfaces/paginated-result.interface';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Order } from '@/orders/entities/order.entity';
+import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 export interface IOrdersService {
   create(userId: string, dto: { items: { productId: string; quantity: number }[] }): Promise<Order>;

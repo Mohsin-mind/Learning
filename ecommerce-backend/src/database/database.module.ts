@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
-import { databaseConfig } from '../config/database.config';
+import { databaseConfig } from '@/config/database.config';
 import { ProductSubscriber } from './subscribers/product.subscriber';
 
 @Module({

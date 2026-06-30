@@ -5,10 +5,10 @@ import { AUTH_SERVICE_TOKEN } from './interfaces/auth-service.interface';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from '../users/entities/user.entity';
-import { UserResponseDto } from '../users/dto/user-response.dto';
-import { Public } from '../common/decorators/public.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { User } from '@/users/entities/user.entity';
+import { UserResponseDto } from '@/users/dto/user-response.dto';
+import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')

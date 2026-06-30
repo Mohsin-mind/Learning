@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
-import { authConfig } from '../config/auth.config';
-import { USERS_SERVICE_TOKEN } from '../users/interfaces/users-service.interface';
-import { User, UserRole } from '../users/entities/user.entity';
+import { authConfig } from '@/config/auth.config';
+import { USERS_SERVICE_TOKEN } from '@/users/interfaces/users-service.interface';
+import { User, UserRole } from '@/users/entities/user.entity';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthService', () => {

@@ -13,8 +13,8 @@
   },
   "license": "UNLICENSED",
   "scripts": {
-    "prepare": "cd .. && husky ecommerce-order-management-api/.husky",
-    "build": "nest build",
+    "prepare": "cd .. && husky ecommerce-backend/.husky",
+    "build": "nest build && tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"*.{json,md,mjs,yml,yaml}\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"*.{json,md,mjs,yml,yaml}\"",
     "dev": "nest start --watch",
@@ -101,6 +101,7 @@
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
@@ -120,6 +121,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   }
 }

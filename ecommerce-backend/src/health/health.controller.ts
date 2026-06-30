@@ -1,8 +1,8 @@
 import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
-import { Public } from '../common/decorators/public.decorator';
-import { APP_VERSION_TOKEN } from '../common/constants/di-tokens.constant';
+import { Public } from '@/common/decorators/public.decorator';
+import { APP_VERSION_TOKEN } from '@/common/constants/di-tokens.constant';
 
 @ApiTags('Health')
 @Controller()

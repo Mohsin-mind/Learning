@@ -2,9 +2,9 @@ import { ConflictException, Inject, Injectable, UnauthorizedException } from '@n
 import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { authConfig } from '../config/auth.config';
-import type { IUsersService } from '../users/interfaces/users-service.interface';
-import { USERS_SERVICE_TOKEN } from '../users/interfaces/users-service.interface';
+import { authConfig } from '@/config/auth.config';
+import type { IUsersService } from '@/users/interfaces/users-service.interface';
+import { USERS_SERVICE_TOKEN } from '@/users/interfaces/users-service.interface';
 import type { IAuthService } from './interfaces/auth-service.interface';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';

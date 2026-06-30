@@ -4,8 +4,8 @@ import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { OrderRepository } from './order.repository';
 import { ORDERS_SERVICE_TOKEN } from './interfaces/orders-service.interface';
-import { ProductsModule } from '../products/products.module';
-import { QUEUES } from '../common/constants/app.constants';
+import { ProductsModule } from '@/products/products.module';
+import { QUEUES } from '@/common/constants/app.constants';
 
 @Module({
   imports: [ProductsModule, BullModule.registerQueue({ name: QUEUES.ORDERS })],

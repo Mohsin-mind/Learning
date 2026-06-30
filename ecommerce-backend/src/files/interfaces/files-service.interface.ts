@@ -1,4 +1,4 @@
-import { FileRecord } from '../entities/file.entity';
+import { FileRecord } from '@/files/entities/file.entity';
 
 export interface IFilesService {
   upload(file: Express.Multer.File, userId: string): Promise<FileRecord>;

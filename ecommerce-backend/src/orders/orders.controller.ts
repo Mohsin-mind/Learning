@@ -14,10 +14,10 @@ import type { IOrdersService } from './interfaces/orders-service.interface';
 import { ORDERS_SERVICE_TOKEN } from './interfaces/orders-service.interface';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { User } from '../users/entities/user.entity';
-import { Admin } from '../common/decorators/admin.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { User } from '@/users/entities/user.entity';
+import { Admin } from '@/common/decorators/admin.decorator';
+import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 
 @ApiTags('Orders')
 @Controller('orders')

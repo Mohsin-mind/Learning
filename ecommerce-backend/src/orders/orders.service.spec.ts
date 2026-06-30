@@ -4,8 +4,8 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { OrdersService } from './orders.service';
 import { OrderRepository } from './order.repository';
-import { ProductRepository } from '../products/product.repository';
-import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
+import { ProductRepository } from '@/products/product.repository';
+import { QUEUES, ORDER_JOBS } from '@/common/constants/app.constants';
 
 describe('OrdersService', () => {
   let service: OrdersService;

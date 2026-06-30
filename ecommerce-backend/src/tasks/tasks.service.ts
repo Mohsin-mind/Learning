@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { LessThan } from 'typeorm';
-import { OrderRepository } from '../orders/order.repository';
-import { OrderStatus } from '../orders/entities/order.entity';
+import { OrderRepository } from '@/orders/order.repository';
+import { OrderStatus } from '@/orders/entities/order.entity';
 
 @Injectable()
 export class TasksService {
