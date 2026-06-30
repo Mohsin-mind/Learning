@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ConfigService, ConfigType } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from './config/config.module';
+import { redisConfig } from './config/redis.config';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -29,7 +30,15 @@ import { NotificationsModule } from './notifications/notifications.module';
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
-    EventEmitterModule.forRoot(),
+    BullModule.forRootAsync({
+      inject: [redisConfig.KEY],
+      useFactory: (config: ConfigType<typeof redisConfig>) => ({
+        connection: {
+          host: config.host,
+          port: config.port,
+        },
+      }),
+    }),
     DatabaseModule,
     AuthModule,
     UsersModule,

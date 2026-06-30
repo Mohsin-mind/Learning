@@ -16,4 +16,6 @@ export const configValidationSchema = Joi.object({
   PORT: Joi.number().default(3000),
   CACHE_TTL: Joi.number().default(60000),
   CACHE_MAX: Joi.number().default(100),
+  REDIS_HOST: Joi.string().default('localhost'),
+  REDIS_PORT: Joi.number().default(6379),
 });

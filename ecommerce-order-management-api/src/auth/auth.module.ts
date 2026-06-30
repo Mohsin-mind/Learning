@@ -28,6 +28,6 @@ import { AUTH_SERVICE_TOKEN } from './interfaces/auth-service.interface';
     },
     JwtStrategy,
   ],
-  exports: [AUTH_SERVICE_TOKEN, JwtStrategy, PassportModule],
+  exports: [AUTH_SERVICE_TOKEN],
 })
 export class AuthModule {}

@@ -1,14 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getQueueToken } from '@nestjs/bullmq';
 import { NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaymentsService } from './payments.service';
 import { PaymentRepository } from './payment.repository';
 import { OrderRepository } from '../orders/order.repository';
 import { Payment, PaymentStatus, PaymentProvider } from './entities/payment.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
+import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
 
 describe('PaymentsService', () => {
   let service: PaymentsService;
+  let orderQueue: { add: jest.Mock };
 
   const mockOrder = {
     id: 'order-1',
@@ -40,21 +42,21 @@ describe('PaymentsService', () => {
     save: jest.fn(),
   };
 
-  const mockEventEmitter = {
-    emit: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PaymentsService,
         { provide: OrderRepository, useValue: mockOrderRepository },
         { provide: PaymentRepository, useValue: mockPaymentRepository },
-        { provide: EventEmitter2, useValue: mockEventEmitter },
+        {
+          provide: getQueueToken(QUEUES.ORDERS),
+          useValue: { add: jest.fn().mockResolvedValue(undefined) },
+        },
       ],
     }).compile();
 
     service = module.get<PaymentsService>(PaymentsService);
+    orderQueue = module.get(getQueueToken(QUEUES.ORDERS));
     jest.clearAllMocks();
   });
 
@@ -90,7 +92,7 @@ describe('PaymentsService', () => {
       expect(mockOrderRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ status: OrderStatus.CONFIRMED }),
       );
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('payment.processed', {
+      expect(orderQueue.add).toHaveBeenCalledWith(ORDER_JOBS.PAYMENT_PROCESSED, {
         orderId: 'order-1',
         paymentId: 'payment-1',
         success: true,
@@ -115,7 +117,7 @@ describe('PaymentsService', () => {
         expect.objectContaining({ status: OrderStatus.CANCELLED }),
       );
       expect(result.status).toBe(PaymentStatus.FAILED);
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('payment.processed', {
+      expect(orderQueue.add).toHaveBeenCalledWith(ORDER_JOBS.PAYMENT_PROCESSED, {
         orderId: 'order-1',
         paymentId: 'payment-1',
         success: false,

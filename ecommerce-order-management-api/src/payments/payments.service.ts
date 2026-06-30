@@ -1,17 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { Payment, PaymentStatus, PaymentProvider } from './entities/payment.entity';
 import { OrderStatus } from '../orders/entities/order.entity';
 import { PaymentRepository } from './payment.repository';
 import { OrderRepository } from '../orders/order.repository';
 import { IPaymentsService } from './interfaces/payments-service.interface';
+import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
 
 @Injectable()
 export class PaymentsService implements IPaymentsService {
   constructor(
     private readonly paymentRepository: PaymentRepository,
     private readonly orderRepository: OrderRepository,
-    private readonly eventEmitter: EventEmitter2,
+    @InjectQueue(QUEUES.ORDERS) private readonly orderQueue: Queue,
   ) {}
 
   async handleWebhook(payload: {
@@ -41,7 +43,7 @@ export class PaymentsService implements IPaymentsService {
 
     const savedPayment = await this.paymentRepository.save(payment);
 
-    this.eventEmitter.emit('payment.processed', {
+    await this.orderQueue.add(ORDER_JOBS.PAYMENT_PROCESSED, {
       orderId: payload.orderId,
       paymentId: savedPayment.id,
       success: payload.success,

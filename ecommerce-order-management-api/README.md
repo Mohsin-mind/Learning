@@ -180,6 +180,47 @@ HTTP Response
 | `pnpm run test:e2e`                                             | E2E tests                              |
 | `pnpm run lint`                                                 | Lint                                   |
 | `pnpm run build`                                                | Type-check + compile                   |
+| `pnpm run redis:status`                                         | Ping Redis — returns PONG if running   |
+
+## Redis Setup (BullMQ)
+
+BullMQ requires a local Redis instance. **One-time install** (Ubuntu/Debian):
+
+```bash
+sudo apt-get install -y redis-server
+```
+
+### Start / Stop
+
+Run these outside the project (require `sudo`):
+
+```bash
+# Start
+sudo systemctl start redis-server
+
+# Stop
+sudo systemctl stop redis-server
+
+# Enable auto-start on boot (optional)
+sudo systemctl enable redis-server
+```
+
+Verify Redis is accepting connections (run from anywhere, no sudo):
+
+```bash
+pnpm redis:status   # should print PONG
+# or directly:
+redis-cli ping
+```
+
+### Env Variables
+
+Defaults work for local dev — no changes needed:
+
+```
+REDIS_HOST=localhost   # default
+REDIS_PORT=6379        # default
+```
 
 ## Seed Credentials
 

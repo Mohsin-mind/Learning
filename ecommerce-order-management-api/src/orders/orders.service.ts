@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderRepository } from './order.repository';
@@ -8,13 +9,14 @@ import { ProductRepository } from '../products/product.repository';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
 import { IOrdersService } from './interfaces/orders-service.interface';
+import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
 
 @Injectable()
 export class OrdersService implements IOrdersService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly productRepository: ProductRepository,
-    private readonly eventEmitter: EventEmitter2,
+    @InjectQueue(QUEUES.ORDERS) private readonly orderQueue: Queue,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -68,10 +70,10 @@ export class OrdersService implements IOrdersService {
 
       await queryRunner.commitTransaction();
 
-      // Emit event AFTER the transaction commits so listeners work with
-      // persisted data. This is the "choreography-based Saga" pattern:
-      // each service reacts to domain events rather than being called directly.
-      this.eventEmitter.emit('order.created', {
+      // Enqueue job AFTER the transaction commits so the processor works with
+      // persisted data. BullMQ persists this job in Redis — if the worker
+      // crashes it will be retried automatically (Choreography Saga pattern).
+      await this.orderQueue.add(ORDER_JOBS.CREATED, {
         orderId: savedOrder.id,
         userId,
         total: savedOrder.total,
@@ -82,9 +84,9 @@ export class OrdersService implements IOrdersService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
-      // Saga compensating event: if DB transaction rolled back, notify other
-      // parts of the system so they can compensate their own state as needed.
-      this.eventEmitter.emit('order.failed', { userId, reason: (error as Error).message });
+      // Saga compensating job: enqueue so the processor notifies the user
+      // even if the worker is temporarily down — it will retry.
+      await this.orderQueue.add(ORDER_JOBS.FAILED, { userId, reason: (error as Error).message });
 
       throw error;
     } finally {

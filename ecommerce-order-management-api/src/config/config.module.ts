@@ -3,6 +3,7 @@ import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { appConfig } from './app.config';
 import { authConfig } from './auth.config';
 import { cacheConfig } from './cache.config';
+import { redisConfig } from './redis.config';
 import { configValidationSchema } from './config.validation';
 import { databaseConfig } from './database.config';
 
@@ -13,7 +14,7 @@ const nodeEnv = process.env.NODE_ENV || 'development';
     NestConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${nodeEnv}`,
-      load: [appConfig, authConfig, databaseConfig, cacheConfig],
+      load: [appConfig, authConfig, databaseConfig, cacheConfig, redisConfig],
       validationSchema: configValidationSchema,
       ignoreEnvVars: false,
     }),

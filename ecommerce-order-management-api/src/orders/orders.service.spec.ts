@@ -1,14 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getQueueToken } from '@nestjs/bullmq';
 import { OrdersService } from './orders.service';
 import { OrderRepository } from './order.repository';
 import { ProductRepository } from '../products/product.repository';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
+import { QUEUES, ORDER_JOBS } from '../common/constants/app.constants';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let eventEmitter: EventEmitter2;
+  let orderQueue: { add: jest.Mock };
 
   const mockProduct = {
     id: 'product-1',
@@ -65,13 +66,13 @@ describe('OrdersService', () => {
         {
           provide: ProductRepository,
           useValue: {
-            target: 'Product', // Mock the entity target
+            target: 'Product',
             findOne: jest.fn(),
           },
         },
         {
-          provide: EventEmitter2,
-          useValue: { emit: jest.fn() },
+          provide: getQueueToken(QUEUES.ORDERS),
+          useValue: { add: jest.fn().mockResolvedValue(undefined) },
         },
         {
           provide: DataSource,
@@ -81,7 +82,7 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+    orderQueue = module.get(getQueueToken(QUEUES.ORDERS));
   });
 
   it('should be defined', () => {
@@ -107,10 +108,8 @@ describe('OrdersService', () => {
       mockQueryRunner.manager.save.mockImplementation((entity: unknown) => {
         const orderEntity = entity as { userId?: string; items?: unknown[] };
         if (orderEntity.userId) {
-          // It's the order entity being saved
           return Promise.resolve({ ...mockOrder, id: 'order-1', items: orderEntity.items });
         }
-        // It's the product entity being saved
         return Promise.resolve(entity);
       });
 
@@ -123,11 +122,10 @@ describe('OrdersService', () => {
       expect(mockQueryRunner.connect).toHaveBeenCalled();
       expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.manager.findOne).toHaveBeenCalled();
-      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(2); // 1 for product stock update, 1 for order
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(2);
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.release).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(eventEmitter.emit).toHaveBeenCalledWith('order.created', {
+      expect(orderQueue.add).toHaveBeenCalledWith(ORDER_JOBS.CREATED, {
         orderId: 'order-1',
         userId: 'user-1',
         total: 59.98,
