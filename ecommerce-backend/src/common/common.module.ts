@@ -14,9 +14,11 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { APP_VERSION_TOKEN } from './constants/di-tokens.constant';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
+import { RequestContextModule } from './context/request-context.module';
 
 @Global()
 @Module({
+  imports: [RequestContextModule],
   providers: [
     {
       provide: APP_FILTER,

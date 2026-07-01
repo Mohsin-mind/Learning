@@ -1,6 +1,6 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { Request } from 'express';
 import { Observable, map } from 'rxjs';
+import { RequestContextService } from '../context/request-context.service';
 
 export interface WrappedResponse<T> {
   success: boolean;
@@ -12,9 +12,10 @@ export interface WrappedResponse<T> {
 
 @Injectable()
 export class ResponseTransformInterceptor<T> implements NestInterceptor<T, WrappedResponse<T>> {
+  constructor(private readonly contextService: RequestContextService) {}
+
   intercept(context: ExecutionContext, next: CallHandler<T>): Observable<WrappedResponse<T>> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const requestId = this.getRequestId(request);
+    const requestId = this.contextService.get('requestId');
 
     return next.handle().pipe(
       map((response) => {
@@ -46,15 +47,5 @@ export class ResponseTransformInterceptor<T> implements NestInterceptor<T, Wrapp
         };
       }),
     );
-  }
-
-  private getRequestId(request: Request): string | undefined {
-    const requestId = request.headers['x-request-id'];
-
-    if (Array.isArray(requestId)) {
-      return requestId[0];
-    }
-
-    return requestId;
   }
 }

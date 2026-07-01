@@ -6,6 +6,7 @@ import { OrdersService } from './orders.service';
 import { OrderRepository } from './order.repository';
 import { ProductRepository } from '@/products/product.repository';
 import { QUEUES, ORDER_JOBS } from '@/common/constants/app.constants';
+import { OrdersGateway } from './orders.gateway';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -62,6 +63,10 @@ describe('OrdersService', () => {
         {
           provide: DataSource,
           useValue: mockDataSource,
+        },
+        {
+          provide: OrdersGateway,
+          useValue: { notifyOrderStatus: jest.fn() },
         },
       ],
     }).compile();

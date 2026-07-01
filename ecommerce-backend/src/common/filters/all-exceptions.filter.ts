@@ -8,6 +8,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { RequestContextService } from '../context/request-context.service';
 
 interface ErrorResponseBody {
   success: false;
@@ -27,11 +28,13 @@ const INTERNAL_SERVER_ERROR_STATUS = 500;
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
+  constructor(private readonly contextService: RequestContextService) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const requestId = this.getRequestId(request);
+    const requestId = this.contextService.get('requestId');
     const status =
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -94,15 +97,5 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     return status === INTERNAL_SERVER_ERROR_STATUS ? 'Internal Server Error' : 'Error';
-  }
-
-  private getRequestId(request: Request): string | undefined {
-    const requestId = request.headers['x-request-id'];
-
-    if (Array.isArray(requestId)) {
-      return requestId[0];
-    }
-
-    return requestId;
   }
 }

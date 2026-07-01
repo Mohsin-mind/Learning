@@ -10,6 +10,7 @@ import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
 import { IOrdersService } from './interfaces/orders-service.interface';
 import { QUEUES, ORDER_JOBS } from '@/common/constants/app.constants';
+import { OrdersGateway } from './orders.gateway';
 
 @Injectable()
 export class OrdersService implements IOrdersService {
@@ -18,6 +19,7 @@ export class OrdersService implements IOrdersService {
     private readonly productRepository: ProductRepository,
     @InjectQueue(QUEUES.ORDERS) private readonly orderQueue: Queue,
     private readonly dataSource: DataSource,
+    private readonly ordersGateway: OrdersGateway,
   ) {}
 
   async create(
@@ -66,9 +68,6 @@ export class OrdersService implements IOrdersService {
         return manager.save(order);
       });
 
-      // Enqueue job AFTER the transaction commits so the processor works with
-      // persisted data. BullMQ persists this job in Redis — if the worker
-      // crashes it will be retried automatically (Choreography Saga pattern).
       await this.orderQueue.add(ORDER_JOBS.CREATED, {
         orderId: savedOrder.id,
         userId,
@@ -78,8 +77,6 @@ export class OrdersService implements IOrdersService {
 
       return savedOrder;
     } catch (error) {
-      // Saga compensating job: enqueue so the processor notifies the user
-      // even if the worker is temporarily down — it will retry.
       await this.orderQueue.add(ORDER_JOBS.FAILED, { userId, reason: (error as Error).message });
       throw error;
     }
@@ -132,6 +129,10 @@ export class OrdersService implements IOrdersService {
       throw new NotFoundException('Order not found');
     }
     order.status = status as OrderStatus;
-    return this.orderRepository.save(order);
+    const saved = await this.orderRepository.save(order);
+
+    this.ordersGateway.notifyOrderStatus(saved.userId, saved.id, saved.status);
+
+    return saved;
   }
 }

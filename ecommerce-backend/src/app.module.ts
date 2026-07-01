@@ -17,6 +17,8 @@ import { PaymentsModule } from './payments/payments.module';
 import { TasksModule } from './tasks/tasks.module';
 import { EventsModule } from './events/events.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AppService } from './app.service';
+import { QUEUES } from '@/common/constants/app.constants';
 
 @Module({
   imports: [
@@ -55,6 +57,10 @@ import { NotificationsModule } from './notifications/notifications.module';
       apiKey: process.env.NOTIFICATIONS_API_KEY || 'test-api-key',
       from: 'noreply@example.com',
     }),
+    BullModule.registerQueue({
+      name: QUEUES.ORDERS,
+    }),
   ],
+  providers: [AppService],
 })
 export class AppModule {}

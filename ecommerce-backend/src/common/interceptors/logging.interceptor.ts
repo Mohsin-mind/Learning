@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable, tap } from 'rxjs';
-import { randomUUID } from 'node:crypto';
+import { RequestContextService } from '../context/request-context.service';
 
 const INTERNAL_SERVER_ERROR_STATUS = 500;
 
@@ -17,16 +17,15 @@ const INTERNAL_SERVER_ERROR_STATUS = 500;
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger(LoggingInterceptor.name);
 
+  constructor(private readonly contextService: RequestContextService) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const http = context.switchToHttp();
     const request = http.getRequest<Request>();
     const response = http.getResponse<Response>();
     const { method, url } = request;
-    const requestId = this.getRequestId(request);
+    const requestId = this.contextService.get('requestId') || 'unknown';
     const now = Date.now();
-
-    request.headers['x-request-id'] = requestId;
-    response.setHeader('x-request-id', requestId);
 
     return next.handle().pipe(
       tap({
@@ -49,15 +48,5 @@ export class LoggingInterceptor implements NestInterceptor {
         },
       }),
     );
-  }
-
-  private getRequestId(request: Request): string {
-    const requestId = request.headers['x-request-id'];
-
-    if (Array.isArray(requestId)) {
-      return requestId[0] ?? randomUUID();
-    }
-
-    return requestId ?? randomUUID();
   }
 }

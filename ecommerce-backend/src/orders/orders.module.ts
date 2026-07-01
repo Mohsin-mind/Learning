@@ -6,6 +6,7 @@ import { OrderRepository } from './order.repository';
 import { ORDERS_SERVICE_TOKEN } from './interfaces/orders-service.interface';
 import { ProductsModule } from '@/products/products.module';
 import { QUEUES } from '@/common/constants/app.constants';
+import { OrdersGateway } from './orders.gateway';
 
 @Module({
   imports: [ProductsModule, BullModule.registerQueue({ name: QUEUES.ORDERS })],
@@ -16,6 +17,7 @@ import { QUEUES } from '@/common/constants/app.constants';
       useClass: OrdersService,
     },
     OrderRepository,
+    OrdersGateway,
   ],
   exports: [ORDERS_SERVICE_TOKEN, OrderRepository],
 })

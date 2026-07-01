@@ -1,15 +1,26 @@
-import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { DataSource } from 'typeorm';
+import {
+  HealthCheckService,
+  TypeOrmHealthIndicator,
+  HealthCheck,
+  HealthIndicatorService,
+} from '@nestjs/terminus';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { Public } from '@/common/decorators/public.decorator';
 import { APP_VERSION_TOKEN } from '@/common/constants/di-tokens.constant';
+import { QUEUES } from '@/common/constants/app.constants';
 
 @ApiTags('Health')
 @Controller()
 export class HealthController {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly health: HealthCheckService,
+    private readonly db: TypeOrmHealthIndicator,
+    private readonly healthIndicatorService: HealthIndicatorService,
     @Inject(APP_VERSION_TOKEN) private readonly version: string,
+    @InjectQueue(QUEUES.ORDERS) private readonly orderQueue: Queue,
   ) {}
 
   @Public()
@@ -25,32 +36,29 @@ export class HealthController {
 
   @Public()
   @Get('health/live')
-  @ApiOperation({ summary: 'Check if the API process is alive' })
+  @HealthCheck()
+  @ApiOperation({ summary: 'Liveness probe' })
   live() {
-    return this.checkLive();
+    return this.health.check([]);
   }
 
   @Public()
   @Get('health/ready')
-  @ApiOperation({ summary: 'Check if the API is ready to receive traffic' })
-  async ready() {
-    if (!this.dataSource.isInitialized) {
-      throw new ServiceUnavailableException('Database is not initialized');
-    }
+  @HealthCheck()
+  @ApiOperation({ summary: 'Readiness probe (includes database + Redis checks)' })
+  ready() {
+    return this.health.check([() => this.db.pingCheck('database'), () => this.checkRedis()]);
+  }
+
+  private async checkRedis() {
+    const indicator = this.healthIndicatorService.check('redis');
 
     try {
-      await this.dataSource.query('SELECT 1');
-    } catch {
-      throw new ServiceUnavailableException('Database is not reachable');
+      const redis = await this.orderQueue.client;
+      await (redis as unknown as { ping: () => Promise<string> }).ping();
+      return indicator.up();
+    } catch (error) {
+      return indicator.down({ message: (error as Error).message });
     }
-
-    return {
-      status: 'ok',
-      version: this.version,
-      uptime: process.uptime(),
-      checks: {
-        database: 'up',
-      },
-    };
   }
 }
