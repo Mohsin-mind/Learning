@@ -17,6 +17,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { TasksModule } from './tasks/tasks.module';
 import { EventsModule } from './events/events.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { OrdersCqrsModule } from './orders-cqrs/orders-cqrs.module';
 import { AppService } from './app.service';
 import { QUEUES } from '@/common/constants/app.constants';
 
@@ -60,6 +61,7 @@ import { QUEUES } from '@/common/constants/app.constants';
     BullModule.registerQueue({
       name: QUEUES.ORDERS,
     }),
+    OrdersCqrsModule,
   ],
   providers: [AppService],
 })

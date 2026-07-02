@@ -9,9 +9,7 @@ export class RequestIdMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     const existing = req.headers['x-request-id'];
-    const requestId: string = Array.isArray(existing)
-      ? (existing[0] ?? randomUUID())
-      : (existing ?? randomUUID());
+    const requestId = (Array.isArray(existing) ? existing[0] : existing)?.trim() || randomUUID();
 
     req.headers['x-request-id'] = requestId;
     res.setHeader('x-request-id', requestId);

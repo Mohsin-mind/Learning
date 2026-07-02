@@ -4,6 +4,7 @@ export const REGEX = {
 
 export const QUEUES = {
   ORDERS: 'orders',
+  ORDERS_CQRS: 'orders-cqrs',
 } as const;
 
 export const ORDER_JOBS = {
