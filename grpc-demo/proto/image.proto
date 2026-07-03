@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package image;
+
+service ImageService {
+  rpc GetImageMetadata (GetImageMetadataRequest) returns (ImageMetadata);
+  rpc ProcessImageWithProgress (ProcessImageRequest) returns (stream ProgressUpdate);
+  rpc UploadImageChunks (stream Chunk) returns (UploadResult);
+  rpc LiveImageEditSession (stream FilterRequest) returns (stream PreviewStatus);
+}
+
+message GetImageMetadataRequest {
+  string fileId = 1;
+}
+
+message ImageMetadata {
+  string fileName = 1;
+  int64 sizeBytes = 2;
+  string format = 3;
+}
+
+message ProcessImageRequest {
+  string fileId = 1;
+}
+
+message ProgressUpdate {
+  string stage = 1;
+  int32 percent = 2;
+}
+
+message Chunk {
+  string fileId = 1;
+  bytes data = 2;
+  int32 chunkIndex = 3;
+}
+
+message UploadResult {
+  string fileId = 1;
+  int64 totalBytes = 2;
+}
+
+message FilterRequest {
+  string fileId = 1;
+  string filter = 2;
+}
+
+message PreviewStatus {
+  string previewStatus = 1;
+}

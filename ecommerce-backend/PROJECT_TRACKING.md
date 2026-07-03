@@ -278,7 +278,7 @@ Before writing any new module, re-read the `users/` module as the reference. Eve
 7. **DTOs** → `dto/create.dto.ts`, `dto/update.dto.ts` — validation + `@ApiProperty()` on every field
 8. **Migration** → run `pnpm migration:generate src/database/migrations/CreateName` after creating entities, then verify the generated file
 
-## Commands
+---## Commands
 
 ```bash
 pnpm run dev          # development with watch
