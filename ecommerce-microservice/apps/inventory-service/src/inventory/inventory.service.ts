@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { EventPattern, MessagePattern } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, RmqContext, RpcException } from '@nestjs/microservices';
 import { EVENTS } from '@app/common';
 
 interface OrderItem {
@@ -27,22 +27,36 @@ export class InventoryService {
   }
 
   @EventPattern(EVENTS.ORDER_CREATED)
-  handleOrderCreated(data: OrderCreatedData) {
-    console.log(`[Inventory] Order created: ${data.orderId}`);
-    for (const item of data.items) {
-      const available = this.stockDb.get(item.productId) ?? 0;
-      if (available < item.quantity) {
-        console.warn(`[Inventory] Insufficient stock for ${item.productId}: need ${item.quantity}, have ${available}`);
-      } else {
+  async handleOrderCreated(data: OrderCreatedData, context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      console.log(`[Inventory] Order created: ${data.orderId}`);
+      for (const item of data.items) {
+        const available = this.stockDb.get(item.productId) ?? 0;
+        if (available < item.quantity) {
+          throw new RpcException({
+            message: `Insufficient stock for ${item.productId}`,
+            orderId: data.orderId,
+            productId: item.productId,
+          });
+        }
         this.stockDb.set(item.productId, available - item.quantity);
         console.log(`[Inventory] Reserved ${item.quantity}x ${item.productId} for order ${data.orderId}`);
       }
+      channel.ack(message);
+    } catch (err) {
+      console.error(`[Inventory] Failed to process order ${data.orderId}`, err);
+      channel.nack(message, false, false);
     }
   }
 
   @EventPattern(EVENTS.ORDER_UPDATED)
-  handleOrderUpdated(data: { orderId: string; status: string }) {
+  handleOrderUpdated(data: { orderId: string; status: string }, context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
     console.log(`[Inventory] Order ${data.orderId} updated to status: ${data.status}`);
+    channel.ack(message);
   }
 
   @MessagePattern('check_stock')

@@ -79,6 +79,7 @@ Architecture: **NestJS monorepo** — two separate processes (order-service + in
 | `devops-use-config-module`    | ✅     | SharedConfigModule with typed namespaces + Joi validation     |
 | `micro-use-patterns`          | ✅     | `@EventPattern` (fire-and-forget) + `@MessagePattern` (RPC)   |
 | `micro-use-health-checks`     |        | Phase 4                                                        |
+| `reliability-use-dlq`         | ✅     | DLX + DLQ configured, `noAck: false`, dead-letter consumer via raw amqplib |
 | `error-use-exception-filters` |        | Phase 4                                                        |
 | `api-use-interceptors`        |        | Phase 4                                                        |
 | `test-use-testing-module`     |        | Phase 5                                                        |
@@ -129,7 +130,7 @@ Architecture: **NestJS monorepo** — two separate processes (order-service + in
 | 4.3 | Add Terminus health check                       |      |       |
 | 4.4 | Add graceful shutdown handlers                  |      |       |
 | 4.5 | Add Swagger / OpenAPI docs                      |      |       |
-| 4.6 | Add retry + dead-letter queue configuration     |      |       |
+| 4.6 | Add retry + dead-letter queue configuration     | [x]  | DLX `orders.dlx` + DLQ `orders.dlq`; `noAck: false`; auto-nack on handler throw |
 
 ### Phase 5 — Testing
 
@@ -203,3 +204,5 @@ pnpm run test:e2e                # e2e tests
 | **`moduleResolution: "node"` + extensionless imports** | NestJS monorepo uses webpack which handles `.ts` resolution; `moduleResolution: "bundler"` caused build failures with the default webpack config — `"node"` works reliably |
 | **Domain naming over technical roles** | `producer`/`consumer` describe infrastructure; `order-service`/`inventory-service` describe business domain — the latter scales naturally when adding more services |
 | **Stale scaffold files cause resolution errors** | `nest generate app` creates a `src/<app-name>.module.ts` that must be deleted when organizing into subdirectories — otherwise TypeScript resolves the wrong copy |
+| **DLX/DLQ for failed messages** | Configure `deadLetterExchange` in `queueOptions`; set `noAck: false` so handler throws nack the message; create separate amqplib consumer on DLQ to avoid NestJS pattern-matching collisions |
+| **`ChannelModel` vs `Connection` in amqplib** | Newer amqplib returns `ChannelModel` (not `Connection`) from `connect()`, which has `createChannel()` and `connection` property. Type accordingly. |
