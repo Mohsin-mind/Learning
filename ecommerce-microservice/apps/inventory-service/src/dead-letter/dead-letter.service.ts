@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqplib';
-import { RMQ_EXCHANGES, RMQ_QUEUES } from '@app/common';
+import { RMQ_QUEUES } from '@app/common';
 
 interface DeadLetterRecord {
   receivedAt: string;
@@ -32,33 +32,39 @@ export class DeadLetterService implements OnModuleInit, OnModuleDestroy {
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createChannel();
 
-      await this.channel.assertExchange(RMQ_EXCHANGES.DEAD_LETTER, 'direct', { durable: true });
-      await this.channel.assertQueue(RMQ_QUEUES.DEAD_LETTER, { durable: true });
-      await this.channel.bindQueue(RMQ_QUEUES.DEAD_LETTER, RMQ_EXCHANGES.DEAD_LETTER, RMQ_QUEUES.DEAD_LETTER);
-
-      await this.channel.consume(RMQ_QUEUES.DEAD_LETTER, (msg) => {
-        if (!msg) return;
-        try {
-          const record: DeadLetterRecord = {
-            receivedAt: new Date().toISOString(),
-            sourceQueue: msg.properties.headers?.['x-first-death-queue'] as string ?? 'unknown',
-            exchange: msg.fields.exchange,
-            routingKey: msg.fields.routingKey,
-            properties: {
-              type: msg.properties.type,
-              headers: msg.properties.headers,
-              messageId: msg.properties.messageId,
-              timestamp: msg.properties.timestamp,
-            },
-            content: this.parseContent(msg.content),
-          };
-          this.store.push(record);
-          this.logger.warn(`Dead letter #${this.store.length} stored — pattern: ${msg.properties.type}, queue: ${record.sourceQueue}`);
-          this.channel!.ack(msg);
-        } catch {
-          this.channel!.nack(msg, false, false);
-        }
-      }, { noAck: false });
+      // The exchange, queue, and binding are already set up by setupInfrastructure() in main.ts.
+      // We only consume here — no need to re-assert (which would conflict on exchange type).
+      await this.channel.consume(
+        RMQ_QUEUES.DEAD_LETTER,
+        (msg) => {
+          if (!msg) return;
+          try {
+            const record: DeadLetterRecord = {
+              receivedAt: new Date().toISOString(),
+              sourceQueue:
+                (msg.properties.headers?.['x-first-death-queue'] as string) ?? 'unknown',
+              exchange: msg.fields.exchange,
+              routingKey: msg.fields.routingKey,
+              properties: {
+                type: msg.properties.type,
+                headers: msg.properties.headers,
+                messageId: msg.properties.messageId,
+                timestamp: msg.properties.timestamp,
+              },
+              content: this.parseContent(msg.content),
+            };
+            this.store.push(record);
+            this.logger.warn(
+              `Dead letter #${this.store.length} stored — pattern: ${msg.properties.type}, ` +
+                `queue: ${record.sourceQueue}`,
+            );
+            this.channel!.ack(msg);
+          } catch {
+            this.channel!.nack(msg, false, false);
+          }
+        },
+        { noAck: false },
+      );
 
       this.logger.log(`Listening on dead-letter queue "${RMQ_QUEUES.DEAD_LETTER}"`);
     } catch (err) {
@@ -67,8 +73,12 @@ export class DeadLetterService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    try { await this.channel?.close(); } catch { /* ignore */ }
-    try { await this.connection?.close(); } catch { /* ignore */ }
+    try {
+      await this.channel?.close();
+    } catch { /* ignore */ }
+    try {
+      await this.connection?.close();
+    } catch { /* ignore */ }
   }
 
   private parseContent(buf: Buffer): unknown {

@@ -130,7 +130,13 @@ Architecture: **NestJS monorepo** — two separate processes (order-service + in
 | 4.3 | Add Terminus health check                       |      |       |
 | 4.4 | Add graceful shutdown handlers                  |      |       |
 | 4.5 | Add Swagger / OpenAPI docs                      |      |       |
-| 4.6 | Add retry + dead-letter queue configuration     | [x]  | DLX `orders.dlx` + DLQ `orders.dlq`; `noAck: false`; auto-nack on handler throw |
+| 4.6 | Add retry + dead-letter queue configuration     | [x]  | DLX `orders.dlx` (topic) + DLQ `orders.dlq`; retry queue with 5s TTL + DLX back to main |
+| 4.7 | Prefetch count                                  | [x]  | `prefetchCount: 1` — one-at-a-time processing per instance |
+| 4.8 | Publisher confirms                              | [x]  | `RmqPublisherService` via `ConfirmChannel` + `waitForConfirms()` |
+| 4.9 | Idempotency / dedup                             | [x]  | `processedIds` `Set` in InventoryService skips duplicate `orderId`s |
+| 4.10 | Retry with backoff (TTL+DLX trick)             | [x]  | `retry_queue` TTL 5s → `orders.redeliver` → back to `order_events`; max 3 attempts then → DLQ |
+| 4.11 | Exchange types (topic)                          | [x]  | `orders` topic exchange with `order.*` routing; publisher uses `channel.publish()` |
+| 4.12 | Message/queue TTL                               | [x]  | `x-message-ttl: 300000` (5 min) on `order_events` |
 
 ### Phase 5 — Testing
 
