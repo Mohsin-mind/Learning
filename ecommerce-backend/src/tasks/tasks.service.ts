@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { LessThan } from 'typeorm';
+import { DataSource, LessThan } from 'typeorm';
 import { OrderRepository } from '@/orders/order.repository';
 import { OrderStatus } from '@/orders/entities/order.entity';
 
@@ -8,7 +8,10 @@ import { OrderStatus } from '@/orders/entities/order.entity';
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
 
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly dataSource: DataSource,
+  ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cleanStaleOrders() {
@@ -26,5 +29,12 @@ export class TasksService {
       await this.orderRepository.remove(staleOrders);
       this.logger.log(`Cleaned ${staleOrders.length} stale cancelled orders`);
     }
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async refreshSalesSummary() {
+    //NOTE: used CONCURRENTLY so when update happened and fetched then it will give response but old data.
+    await this.dataSource.query('REFRESH MATERIALIZED VIEW CONCURRENTLY order_sales_summary');
+    this.logger.log('Refreshed order_sales_summary materialized view');
   }
 }

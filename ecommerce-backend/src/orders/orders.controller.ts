@@ -41,6 +41,13 @@ export class OrdersController {
     return this.ordersService.findByUser(user.id, query);
   }
 
+  @Get('sales/summary')
+  @Admin()
+  @ApiOperation({ summary: 'Get sales summary from materialized view' })
+  getSalesSummary() {
+    return this.ordersService.getSalesSummary();
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order by ID' })

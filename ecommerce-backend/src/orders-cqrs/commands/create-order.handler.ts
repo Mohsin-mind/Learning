@@ -56,17 +56,12 @@ export class CreateOrderHandler implements ICommandHandler<CreateOrderCommand> {
 
     const [event] = aggregate.getUncommittedEvents() as [OrderCreatedEvent];
 
-    await this.eventStore.append(
-      event.orderId,
-      'Order',
-      'OrderCreated',
-      {
-        orderId: event.orderId,
-        userId: event.userId,
-        items: event.items,
-        total: event.total,
-      },
-    );
+    await this.eventStore.append(event.orderId, 'Order', 'OrderCreated', {
+      orderId: event.orderId,
+      userId: event.userId,
+      items: event.items,
+      total: event.total,
+    });
 
     this.eventBus.publish(event);
     aggregate.commit();

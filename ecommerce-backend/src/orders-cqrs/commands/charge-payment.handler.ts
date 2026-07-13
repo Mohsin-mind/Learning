@@ -21,28 +21,18 @@ export class ChargePaymentHandler implements ICommandHandler<ChargePaymentComman
     const success = true;
 
     if (success) {
-      await this.eventStore.append(
+      await this.eventStore.append(orderId, 'Order', 'PaymentCharged', {
         orderId,
-        'Order',
-        'PaymentCharged',
-        {
-          orderId,
-          amount,
-        },
-      );
+        amount,
+      });
 
       this.logger.log(`Payment charged for order ${orderId} ($${amount})`);
       this.eventBus.publish(new PaymentChargedEvent(orderId, amount));
     } else {
-      await this.eventStore.append(
+      await this.eventStore.append(orderId, 'Order', 'PaymentFailed', {
         orderId,
-        'Order',
-        'PaymentFailed',
-        {
-          orderId,
-          reason: 'Insufficient funds',
-        },
-      );
+        reason: 'Insufficient funds',
+      });
 
       this.logger.warn(`Payment failed for order ${orderId}: Insufficient funds`);
       this.eventBus.publish(new PaymentFailedEvent(orderId, 'Insufficient funds'));

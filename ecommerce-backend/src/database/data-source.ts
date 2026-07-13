@@ -1,3 +1,4 @@
+import 'tsconfig-paths/register';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DataSource } from 'typeorm';
@@ -18,7 +19,10 @@ const AppDataSource = new DataSource({
 });
 
 function loadEnvFile() {
-  const envPath = resolve(process.cwd(), '.env');
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const projectRoot = resolve(__dirname, '../../');
+  const envPath = resolve(projectRoot, `.env.${nodeEnv}`);
+
   if (!existsSync(envPath)) {
     return;
   }

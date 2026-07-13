@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { OrderRepository } from './order.repository';
+import { OrderSalesSummaryRepository } from './order-sales-summary.repository';
 import { ORDERS_SERVICE_TOKEN } from './interfaces/orders-service.interface';
 import { ProductsModule } from '@/products/products.module';
 import { QUEUES } from '@/common/constants/app.constants';
@@ -17,6 +18,7 @@ import { OrdersGateway } from './orders.gateway';
       useClass: OrdersService,
     },
     OrderRepository,
+    OrderSalesSummaryRepository,
     OrdersGateway,
   ],
   exports: [ORDERS_SERVICE_TOKEN, OrderRepository],

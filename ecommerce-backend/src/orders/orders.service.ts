@@ -4,7 +4,9 @@ import { Queue } from 'bullmq';
 import { DataSource } from 'typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
+import { OrderSalesSummary } from './entities/order-sales-summary.entity';
 import { OrderRepository } from './order.repository';
+import { OrderSalesSummaryRepository } from './order-sales-summary.repository';
 import { ProductRepository } from '@/products/product.repository';
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { PaginatedResult } from '@/common/interfaces/paginated-result.interface';
@@ -16,6 +18,7 @@ import { OrdersGateway } from './orders.gateway';
 export class OrdersService implements IOrdersService {
   constructor(
     private readonly orderRepository: OrderRepository,
+    private readonly orderSalesSummaryRepository: OrderSalesSummaryRepository,
     private readonly productRepository: ProductRepository,
     @InjectQueue(QUEUES.ORDERS) private readonly orderQueue: Queue,
     private readonly dataSource: DataSource,
@@ -134,5 +137,11 @@ export class OrdersService implements IOrdersService {
     this.ordersGateway.notifyOrderStatus(saved.userId, saved.id, saved.status);
 
     return saved;
+  }
+
+  async getSalesSummary(): Promise<OrderSalesSummary[]> {
+    return this.orderSalesSummaryRepository.find({
+      order: { orderDate: 'DESC' },
+    });
   }
 }

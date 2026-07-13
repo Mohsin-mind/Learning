@@ -38,28 +38,18 @@ export class DeductStockHandler implements ICommandHandler<DeductStockCommand> {
         }
       });
 
-      await this.eventStore.append(
+      await this.eventStore.append(orderId, 'Order', 'StockDeducted', {
         orderId,
-        'Order',
-        'StockDeducted',
-        {
-          orderId,
-          items,
-        },
-      );
+        items,
+      });
 
       this.eventBus.publish(new StockDeductedEvent(orderId, items));
     } catch (error) {
       const reason = (error as Error).message;
-      await this.eventStore.append(
+      await this.eventStore.append(orderId, 'Order', 'StockDeductionFailed', {
         orderId,
-        'Order',
-        'StockDeductionFailed',
-        {
-          orderId,
-          reason,
-        },
-      );
+        reason,
+      });
 
       this.eventBus.publish(new StockDeductionFailedEvent(orderId, reason));
     }

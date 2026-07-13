@@ -32,15 +32,10 @@ export class RestoreStockHandler implements ICommandHandler<RestoreStockCommand>
       }
     });
 
-    await this.eventStore.append(
+    await this.eventStore.append(orderId, 'Order', 'StockRestored', {
       orderId,
-      'Order',
-      'StockRestored',
-      {
-        orderId,
-        items,
-      },
-    );
+      items,
+    });
 
     this.eventBus.publish(new StockRestoredEvent(orderId, items));
   }

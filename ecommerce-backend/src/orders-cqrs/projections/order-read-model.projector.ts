@@ -65,9 +65,7 @@ export class PaymentFailedProjector implements IEventHandler<PaymentFailedEvent>
 
 @Injectable()
 @EventsHandler(StockDeductionFailedEvent)
-export class StockDeductionFailedProjector
-  implements IEventHandler<StockDeductionFailedEvent>
-{
+export class StockDeductionFailedProjector implements IEventHandler<StockDeductionFailedEvent> {
   constructor(private readonly dataSource: DataSource) {}
 
   async handle(event: StockDeductionFailedEvent): Promise<void> {
