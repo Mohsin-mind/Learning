@@ -7,18 +7,18 @@ export class CreateOrderSalesSummaryView1795000000000 implements MigrationInterf
     await queryRunner.query(`
       CREATE MATERIALIZED VIEW order_sales_summary AS
       SELECT
-        DATE(o."createdAt") AS "orderDate",
+        DATE_TRUNC('month', o."createdAt") AS "orderMonth",
         COUNT(*)::int AS "totalOrders",
         CAST(SUM(o.total) AS numeric(10,2)) AS "totalRevenue",
         CAST(AVG(o.total) AS numeric(10,2)) AS "avgOrderValue"
       FROM orders o
       WHERE o.status != 'cancelled'
-      GROUP BY DATE(o."createdAt")
-      ORDER BY DATE(o."createdAt") DESC
+      GROUP BY DATE_TRUNC('month', o."createdAt")
+      ORDER BY DATE_TRUNC('month', o."createdAt") DESC
     `);
 
     await queryRunner.query(`
-      CREATE UNIQUE INDEX idx_order_sales_summary_date ON order_sales_summary ("orderDate")
+      CREATE UNIQUE INDEX idx_order_sales_summary_month ON order_sales_summary ("orderMonth")
     `);
   }
 

@@ -141,7 +141,7 @@ export class OrdersService implements IOrdersService {
 
   async getSalesSummary(): Promise<OrderSalesSummary[]> {
     return this.orderSalesSummaryRepository.find({
-      order: { orderDate: 'DESC' },
+      order: { orderMonth: 'DESC' },
     });
   }
 }
