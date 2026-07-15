@@ -10,6 +10,7 @@ import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { ResponseTransformInterceptor } from './interceptors/response-transform.interceptor';
 import { PerformanceInterceptor } from './interceptors/performance.interceptor';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { APP_VERSION_TOKEN } from './constants/di-tokens.constant';
@@ -31,6 +32,10 @@ import { RequestContextModule } from './context/request-context.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_INTERCEPTOR,

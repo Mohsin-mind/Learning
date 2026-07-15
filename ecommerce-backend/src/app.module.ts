@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from './config/config.module';
 import { redisConfig } from './config/redis.config';
@@ -34,6 +35,7 @@ import { QUEUES } from '@/common/constants/app.constants';
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
     BullModule.forRootAsync({
       inject: [redisConfig.KEY],
       useFactory: (config: ConfigType<typeof redisConfig>) => ({
