@@ -21,6 +21,6 @@ import { OrdersGateway } from './orders.gateway';
     OrderSalesSummaryRepository,
     OrdersGateway,
   ],
-  exports: [ORDERS_SERVICE_TOKEN, OrderRepository],
+  exports: [ORDERS_SERVICE_TOKEN, OrderRepository, OrderSalesSummaryRepository],
 })
 export class OrdersModule {}

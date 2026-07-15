@@ -15,6 +15,7 @@ import { OrdersModule } from './orders/orders.module';
 import { FilesModule } from './files/files.module';
 import { PaymentsModule } from './payments/payments.module';
 import { TasksModule } from './tasks/tasks.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { EventsModule } from './events/events.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { OrdersCqrsModule } from './orders-cqrs/orders-cqrs.module';
@@ -52,6 +53,7 @@ import { QUEUES } from '@/common/constants/app.constants';
     FilesModule,
     PaymentsModule,
     TasksModule,
+    DashboardModule,
     EventsModule,
     NotificationsModule.register({
       provider: 'email',

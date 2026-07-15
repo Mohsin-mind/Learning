@@ -17,3 +17,9 @@ export const WORKER_EVENTS = {
   COMPLETED: 'completed',
   FAILED: 'failed',
 } as const;
+
+export const DASHBOARD_CACHE = {
+  SALES_KEY: 'dashboard:sales',
+  NOTES_KEY: 'dashboard:notes',
+  TTL: 5 * 60 * 1000,
+} as const;
