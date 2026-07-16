@@ -31,3 +31,7 @@ export const STAMPEDE_CACHE = {
   PEE_KEY: 'dashboard:stampede:pee:notes',
   SWR_KEY: 'dashboard:stampede:swr:notes',
 } as const;
+
+export const CDC_CHANNELS = {
+  DASHBOARD_NOTES: 'dashboard_notes_channel',
+} as const;

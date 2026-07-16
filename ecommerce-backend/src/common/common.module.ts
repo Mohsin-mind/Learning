@@ -17,12 +17,14 @@ import { APP_VERSION_TOKEN } from './constants/di-tokens.constant';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { RequestContextModule } from './context/request-context.module';
 import { CacheStampedeService } from './services/cache-stampede.service';
+import { CdcListenerService } from './services/cdc-listener.service';
 
 @Global()
 @Module({
   imports: [RequestContextModule],
   providers: [
     CacheStampedeService,
+    CdcListenerService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
@@ -61,7 +63,7 @@ import { CacheStampedeService } from './services/cache-stampede.service';
       useValue: '1.0.0',
     },
   ],
-  exports: [APP_VERSION_TOKEN, CacheStampedeService],
+  exports: [APP_VERSION_TOKEN, CacheStampedeService, CdcListenerService],
 })
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

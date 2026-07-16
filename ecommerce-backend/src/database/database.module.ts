@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
 import { databaseConfig } from '@/config/database.config';
-import { ProductSubscriber } from './subscribers/product.subscriber';
 
 @Module({
   imports: [
@@ -17,12 +16,10 @@ import { ProductSubscriber } from './subscribers/product.subscriber';
         database: config.database,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        subscribers: [ProductSubscriber],
         synchronize: config.synchronize,
         logging: config.logging,
       }),
     }),
   ],
-  providers: [ProductSubscriber],
 })
 export class DatabaseModule {}
