@@ -8,7 +8,8 @@ import { OrderSalesSummaryRepository } from '@/orders/order-sales-summary.reposi
 import { DashboardNote } from './entities/dashboard-note.entity';
 import { DashboardNoteRepository } from './dashboard-note.repository';
 import { IDashboardService } from './interfaces/dashboard-service.interface';
-import { DASHBOARD_CACHE } from '@/common/constants/app.constants';
+import { DASHBOARD_CACHE, STAMPEDE_CACHE } from '@/common/constants/app.constants';
+import { CacheStampedeService } from '@/common/services/cache-stampede.service';
 
 @Injectable()
 export class DashboardService implements IDashboardService {
@@ -18,6 +19,7 @@ export class DashboardService implements IDashboardService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly orderSalesSummaryRepo: OrderSalesSummaryRepository,
     private readonly noteRepo: DashboardNoteRepository,
+    private readonly stampedeService: CacheStampedeService,
   ) {}
 
   /* Cache-Aside (Lazy Loading): check cache first, fall back to DB on miss, populate cache */
@@ -60,9 +62,13 @@ export class DashboardService implements IDashboardService {
     const id = crypto.randomUUID();
     const preview = { id, message };
 
-    this.cacheManager.get<DashboardNote[]>(DASHBOARD_CACHE.NOTES_KEY).then((existing) => {
+    void this.cacheManager.get<DashboardNote[]>(DASHBOARD_CACHE.NOTES_KEY).then((existing) => {
       const notes = existing || [];
-      this.cacheManager.set(DASHBOARD_CACHE.NOTES_KEY, [{ id, message, createdAt: new Date() } as DashboardNote, ...notes], DASHBOARD_CACHE.TTL);
+      void this.cacheManager.set(
+        DASHBOARD_CACHE.NOTES_KEY,
+        [{ id, message, createdAt: new Date() }, ...notes],
+        DASHBOARD_CACHE.TTL,
+      );
     });
 
     this.persistNoteInBackground(id, message);
@@ -78,6 +84,39 @@ export class DashboardService implements IDashboardService {
   /* Granular Invalidation: delete single cache key for notes */
   async invalidateNotesCache(): Promise<void> {
     await this.cacheManager.del(DASHBOARD_CACHE.NOTES_KEY);
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Cache Stampede Prevention demos
+  // ──────────────────────────────────────────────────────────────
+
+  /* Pattern 1 — Mutex: only one request recomputes, others wait */
+  async getNotesWithMutex(): Promise<DashboardNote[]> {
+    return this.stampedeService.getOrComputeWithMutex(
+      STAMPEDE_CACHE.MUTEX_KEY,
+      `lock:${STAMPEDE_CACHE.MUTEX_KEY}`,
+      () => this.noteRepo.find({ order: { createdAt: 'DESC' } }),
+      STAMPEDE_CACHE.TTL,
+    );
+  }
+
+  /* Pattern 2 — PEE: random early recompute based on remaining TTL */
+  async getNotesWithPEE(): Promise<DashboardNote[]> {
+    return this.stampedeService.getWithProbabilisticExpiry(
+      STAMPEDE_CACHE.PEE_KEY,
+      () => this.noteRepo.find({ order: { createdAt: 'DESC' } }),
+      STAMPEDE_CACHE.TTL,
+    );
+  }
+
+  /* Pattern 3 — SWR: serve stale, refresh in background */
+  async getNotesWithSWR(): Promise<DashboardNote[]> {
+    return this.stampedeService.getWithStaleWhileRevalidate(
+      STAMPEDE_CACHE.SWR_KEY,
+      () => this.noteRepo.find({ order: { createdAt: 'DESC' } }),
+      STAMPEDE_CACHE.TTL,
+      STAMPEDE_CACHE.STALE_TTL,
+    );
   }
 
   /* Refresh-Ahead: proactively warm cache before TTL expiry, preventing cache misses */

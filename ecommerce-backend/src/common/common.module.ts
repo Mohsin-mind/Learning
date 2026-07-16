@@ -16,11 +16,13 @@ import { RolesGuard } from './guards/roles.guard';
 import { APP_VERSION_TOKEN } from './constants/di-tokens.constant';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { RequestContextModule } from './context/request-context.module';
+import { CacheStampedeService } from './services/cache-stampede.service';
 
 @Global()
 @Module({
   imports: [RequestContextModule],
   providers: [
+    CacheStampedeService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
@@ -59,7 +61,7 @@ import { RequestContextModule } from './context/request-context.module';
       useValue: '1.0.0',
     },
   ],
-  exports: [APP_VERSION_TOKEN],
+  exports: [APP_VERSION_TOKEN, CacheStampedeService],
 })
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

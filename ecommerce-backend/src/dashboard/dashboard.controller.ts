@@ -42,7 +42,9 @@ export class DashboardController {
 
   @Post('notes/async')
   @Admin()
-  @ApiOperation({ summary: 'Create note — caches immediately, persists DB in background (Write-Behind)' })
+  @ApiOperation({
+    summary: 'Create note — caches immediately, persists DB in background (Write-Behind)',
+  })
   createNoteAsync(@Body('message') message: string) {
     return this.dashboardService.createNoteAsync(message);
   }
@@ -52,5 +54,36 @@ export class DashboardController {
   @ApiOperation({ summary: 'Invalidate notes cache (Granular Invalidation)' })
   invalidateNotesCache() {
     return this.dashboardService.invalidateNotesCache();
+  }
+
+  /* Cache Stampede Prevention demos */
+
+  @Get('notes/stampede/mutex')
+  @Admin()
+  @ApiOperation({
+    summary:
+      'Get notes via Mutex pattern — one recomputes, others wait (Cache Stampede Prevention)',
+  })
+  getNotesWithMutex() {
+    return this.dashboardService.getNotesWithMutex();
+  }
+
+  @Get('notes/stampede/pee')
+  @Admin()
+  @ApiOperation({
+    summary: 'Get notes via Probabilistic Early Expiration (Cache Stampede Prevention)',
+  })
+  getNotesWithPEE() {
+    return this.dashboardService.getNotesWithPEE();
+  }
+
+  @Get('notes/stampede/swr')
+  @Admin()
+  @ApiOperation({
+    summary:
+      'Get notes via Stale-While-Revalidate — serve stale, refresh in background (Cache Stampede Prevention)',
+  })
+  getNotesWithSWR() {
+    return this.dashboardService.getNotesWithSWR();
   }
 }

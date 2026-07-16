@@ -9,6 +9,11 @@ export interface IDashboardService {
   createNote(message: string): Promise<DashboardNote>;
   createNoteAsync(message: string): Promise<{ id: string; message: string }>;
   invalidateNotesCache(): Promise<void>;
-}
+
+  // Cache stampede prevention demos
+  getNotesWithMutex(): Promise<DashboardNote[]>;
+  getNotesWithPEE(): Promise<DashboardNote[]>;
+  getNotesWithSWR(): Promise<DashboardNote[]>;
+} // end IDashboardService
 
 export const DASHBOARD_SERVICE_TOKEN = Symbol('DASHBOARD_SERVICE_TOKEN');
