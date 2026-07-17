@@ -77,8 +77,7 @@ if (!instanceId || !apiToken || !otlpEndpoint) {
         // Exclude the OTLP exporter's own HTTP calls from tracing — otherwise the
         // act of exporting spans would itself generate new spans (infinite loop).
         '@opentelemetry/instrumentation-http': {
-          ignoreOutgoingRequestHook: (request) =>
-            (request.hostname ?? '').includes('grafana.net'),
+          ignoreOutgoingRequestHook: (request) => (request.hostname ?? '').includes('grafana.net'),
         },
       }),
     ],
