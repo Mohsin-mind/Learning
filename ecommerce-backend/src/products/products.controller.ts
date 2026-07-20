@@ -16,6 +16,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Cache } from 'cache-manager';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { AlgoliaSearchQueryDto } from './dto/algolia-search-query.dto';
 import { Admin } from '@/common/decorators/admin.decorator';
 import { PaginationQueryDto } from '@/common/dto/pagination-query.dto';
 import { Public } from '@/common/decorators/public.decorator';
@@ -39,6 +40,15 @@ export class ProductsController {
   @ApiOperation({ summary: 'List all products with pagination, filtering, and sorting' })
   findAll(@Query() query: PaginationQueryDto) {
     return this.productsService.findAll(query);
+  }
+
+  @Public()
+  @Get('search/algolia')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1 * 60 * 1000)
+  @ApiOperation({ summary: 'Search products via Algolia (full-text search with typo tolerance)' })
+  searchAlgolia(@Query() query: AlgoliaSearchQueryDto) {
+    return this.productsService.searchAlgolia(query.q ?? '', query.page, query.limit);
   }
 
   @Public()

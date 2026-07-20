@@ -18,6 +18,7 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { RequestContextModule } from './context/request-context.module';
 import { CacheStampedeService } from './services/cache-stampede.service';
 import { CdcListenerService } from './services/cdc-listener.service';
+import { AlgoliaService } from './services/algolia.service';
 
 @Global()
 @Module({
@@ -25,6 +26,7 @@ import { CdcListenerService } from './services/cdc-listener.service';
   providers: [
     CacheStampedeService,
     CdcListenerService,
+    AlgoliaService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
@@ -63,7 +65,7 @@ import { CdcListenerService } from './services/cdc-listener.service';
       useValue: '1.0.0',
     },
   ],
-  exports: [APP_VERSION_TOKEN, CacheStampedeService, CdcListenerService],
+  exports: [APP_VERSION_TOKEN, CacheStampedeService, CdcListenerService, AlgoliaService],
 })
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

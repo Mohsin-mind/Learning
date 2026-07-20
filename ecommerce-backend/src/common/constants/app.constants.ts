@@ -35,3 +35,7 @@ export const STAMPEDE_CACHE = {
 export const CDC_CHANNELS = {
   DASHBOARD_NOTES: 'dashboard_notes_channel',
 } as const;
+
+export const ALGOLIA_INDEX = {
+  PRODUCTS: 'products',
+} as const;
