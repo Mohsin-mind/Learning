@@ -52,6 +52,15 @@ export class ProductsController {
   }
 
   @Public()
+  @Get('search/ts')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1 * 60 * 1000)
+  @ApiOperation({ summary: 'Search products via PostgreSQL full-text search (tsvector/tsquery)' })
+  searchTs(@Query() query: AlgoliaSearchQueryDto) {
+    return this.productsService.searchTs(query.q ?? '', query.page, query.limit);
+  }
+
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get a product by ID' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {

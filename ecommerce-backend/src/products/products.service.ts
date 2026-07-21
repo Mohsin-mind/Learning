@@ -141,6 +141,48 @@ export class ProductsService implements IProductsService {
     };
   }
 
+  async searchTs(
+    query: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<PaginatedResult<Product>> {
+    const cleaned = query.replace(/[^\w\s"-]/g, '').trim();
+    if (!cleaned) {
+      const all = await this.productRepository.find({ skip: (page - 1) * limit, take: limit });
+      const total = await this.productRepository.count();
+      const totalPages = Math.ceil(total / limit);
+      return {
+        data: all,
+        meta: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+      };
+    }
+
+    const tsQuery = `plainto_tsquery('english', :query)`;
+
+    const [data, total] = await this.productRepository
+      .createQueryBuilder('product')
+      .where(`product.search_vector @@ ${tsQuery}`, { query: cleaned })
+      .orderBy(`ts_rank(product.search_vector, ${tsQuery})`, 'DESC')
+      .addOrderBy('product.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
   async remove(id: string): Promise<void> {
     const product = await this.findById(id);
     if (!product) {
