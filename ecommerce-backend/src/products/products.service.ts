@@ -82,6 +82,9 @@ export class ProductsService implements IProductsService {
     page: number = 1,
     limit: number = 10,
   ): Promise<PaginatedResult<Product>> {
+    page = Math.max(1, page);
+    limit = Math.min(Math.max(1, limit), 100);
+
     const result = await this.algolia.search(ALGOLIA_INDEX.PRODUCTS, query, {
       page: page - 1,
       hitsPerPage: limit,
@@ -146,14 +149,14 @@ export class ProductsService implements IProductsService {
     page: number = 1,
     limit: number = 10,
   ): Promise<PaginatedResult<Product>> {
-    const cleaned = query.replace(/[^\w\s"-]/g, '').trim();
+    page = Math.max(1, page);
+    limit = Math.min(Math.max(1, limit), 100);
+
+    const cleaned = query.trim();
     if (!cleaned) {
-      const all = await this.productRepository.find({ skip: (page - 1) * limit, take: limit });
-      const total = await this.productRepository.count();
-      const totalPages = Math.ceil(total / limit);
       return {
-        data: all,
-        meta: { total, page, limit, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+        data: [],
+        meta: { total: 0, page, limit, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
       };
     }
 
@@ -162,7 +165,7 @@ export class ProductsService implements IProductsService {
     const [data, total] = await this.productRepository
       .createQueryBuilder('product')
       .where(`product.search_vector @@ ${tsQuery}`, { query: cleaned })
-      .orderBy(`ts_rank(product.search_vector, ${tsQuery})`, 'DESC')
+      .orderBy(`ts_rank_cd(product.search_vector, ${tsQuery})`, 'DESC')
       .addOrderBy('product.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
