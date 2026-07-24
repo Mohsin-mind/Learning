@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User, UserRole } from '../../domain/user.entity.js';
-import { UserRepository } from '../../application/ports/outbound/user-repository.port.js';
-import { TypeOrmUser, OrmUserRole } from './typeorm-user.entity.js';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { User, UserRole } from "../../domain/user.entity.js";
+import { UserRepository } from "../../application/ports/outbound/user-repository.port.js";
+import { TypeOrmUser, OrmUserRole } from "./typeorm-user.entity.js";
 
 @Injectable()
 export class TypeOrmUserRepository implements UserRepository {
@@ -30,7 +30,7 @@ export class TypeOrmUserRepository implements UserRepository {
       email: user.email,
       password: user.password,
       name: user.name,
-      role: (user.role as unknown) as OrmUserRole,
+      role: user.role as unknown as OrmUserRole,
     });
     const saved = await this.repo.save(orm);
     return this.toDomain(saved);
@@ -42,7 +42,7 @@ export class TypeOrmUserRepository implements UserRepository {
       orm.email,
       orm.name,
       orm.password,
-      (orm.role as unknown) as UserRole,
+      orm.role as unknown as UserRole,
     );
   }
 }

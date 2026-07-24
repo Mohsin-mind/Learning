@@ -1,4 +1,4 @@
-export const PAYMENT_GATEWAY = Symbol('PaymentGateway');
+export const PAYMENT_GATEWAY = Symbol("PaymentGateway");
 
 export type PaymentResult = {
   success: boolean;

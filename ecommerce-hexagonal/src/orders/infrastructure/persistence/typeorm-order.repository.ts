@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Order } from '../../domain/order.entity.js';
-import { OrderItem } from '../../domain/order-item.entity.js';
-import { Money } from '../../../shared/domain/value-objects/money.js';
-import { OrderStatus } from '../../../shared/domain/value-objects/order-status.js';
-import type { OrderRepository } from '../../application/ports/outbound/order-repository.port.js';
-import { TypeOrmOrder, OrmOrderStatus } from './typeorm-order.entity.js';
-import { TypeOrmOrderItem } from './typeorm-order-item.entity.js';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Order } from "../../domain/order.entity.js";
+import { OrderItem } from "../../domain/order-item.entity.js";
+import { Money } from "../../../shared/domain/value-objects/money.js";
+import { OrderStatus } from "../../../shared/domain/value-objects/order-status.js";
+import type { OrderRepository } from "../../application/ports/outbound/order-repository.port.js";
+import { TypeOrmOrder, OrmOrderStatus } from "./typeorm-order.entity.js";
+import { TypeOrmOrderItem } from "./typeorm-order-item.entity.js";
 
 @Injectable()
 export class TypeOrmOrderRepository implements OrderRepository {
@@ -40,7 +40,14 @@ export class TypeOrmOrderRepository implements OrderRepository {
   private toDomain(orm: TypeOrmOrder): Order {
     const items = orm.items.map(
       (i) =>
-        new OrderItem(i.productId, i.productName, new Money(Number(i.price)), i.quantity, i.orderId, i.id),
+        new OrderItem(
+          i.productId,
+          i.productName,
+          new Money(Number(i.price)),
+          i.quantity,
+          i.orderId,
+          i.id,
+        ),
     );
     return Order.reconstitute(
       orm.id,

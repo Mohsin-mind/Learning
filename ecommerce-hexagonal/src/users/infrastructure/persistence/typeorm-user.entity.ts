@@ -4,16 +4,16 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
 export enum OrmUserRole {
-  USER = 'user',
-  ADMIN = 'admin',
+  USER = "user",
+  ADMIN = "admin",
 }
 
-@Entity('users')
+@Entity("users")
 export class TypeOrmUser {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column({ unique: true })
@@ -25,7 +25,7 @@ export class TypeOrmUser {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: OrmUserRole, default: OrmUserRole.USER })
+  @Column({ type: "enum", enum: OrmUserRole, default: OrmUserRole.USER })
   role: OrmUserRole;
 
   @CreateDateColumn()

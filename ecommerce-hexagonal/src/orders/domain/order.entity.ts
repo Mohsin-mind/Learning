@@ -1,11 +1,11 @@
-import { Money } from '../../shared/domain/value-objects/money.js';
+import { Money } from "../../shared/domain/value-objects/money.js";
 import {
   OrderStatus,
   canTransition,
-} from '../../shared/domain/value-objects/order-status.js';
-import { OrderItem } from './order-item.entity.js';
-import { OrderCreatedEvent } from './events/order-created.event.js';
-import { OrderStatusChangedEvent } from './events/order-status-changed.event.js';
+} from "../../shared/domain/value-objects/order-status.js";
+import { OrderItem } from "./order-item.entity.js";
+import { OrderCreatedEvent } from "./events/order-created.event.js";
+import { OrderStatusChangedEvent } from "./events/order-status-changed.event.js";
 
 type OrderEvent = OrderCreatedEvent | OrderStatusChangedEvent;
 
@@ -22,11 +22,7 @@ export class Order {
     public updatedAt: Date,
   ) {}
 
-  static create(
-    id: string,
-    userId: string,
-    items: OrderItem[],
-  ): Order {
+  static create(id: string, userId: string, items: OrderItem[]): Order {
     const total = items.reduce(
       (sum, item) => sum.add(item.subtotal),
       new Money(0),
@@ -69,9 +65,7 @@ export class Order {
 
   changeStatus(newStatus: OrderStatus): void {
     if (!canTransition(this.status, newStatus)) {
-      throw new Error(
-        `Cannot transition from ${this.status} to ${newStatus}`,
-      );
+      throw new Error(`Cannot transition from ${this.status} to ${newStatus}`);
     }
     this.status = newStatus;
     this.updatedAt = new Date();

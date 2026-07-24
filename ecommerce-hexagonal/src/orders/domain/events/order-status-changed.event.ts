@@ -1,4 +1,4 @@
-import { OrderStatus } from '../../../shared/domain/value-objects/order-status.js';
+import { OrderStatus } from "../../../shared/domain/value-objects/order-status.js";
 
 export class OrderStatusChangedEvent {
   constructor(

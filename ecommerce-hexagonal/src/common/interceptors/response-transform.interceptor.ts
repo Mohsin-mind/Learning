@@ -1,5 +1,10 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { Observable, map } from 'rxjs';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from "@nestjs/common";
+import { Observable, map } from "rxjs";
 
 export interface WrappedResponse<T> {
   success: boolean;
@@ -9,15 +14,21 @@ export interface WrappedResponse<T> {
 }
 
 @Injectable()
-export class ResponseTransformInterceptor<T> implements NestInterceptor<T, WrappedResponse<T>> {
-  intercept(context: ExecutionContext, next: CallHandler<T>): Observable<WrappedResponse<T>> {
+export class ResponseTransformInterceptor<T> implements NestInterceptor<
+  T,
+  WrappedResponse<T>
+> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<T>,
+  ): Observable<WrappedResponse<T>> {
     return next.handle().pipe(
       map((response) => {
         const isPaginated =
           response &&
-          typeof response === 'object' &&
-          'data' in (response as Record<string, unknown>) &&
-          'meta' in (response as Record<string, unknown>);
+          typeof response === "object" &&
+          "data" in (response as Record<string, unknown>) &&
+          "meta" in (response as Record<string, unknown>);
 
         if (isPaginated) {
           const paginated = response as unknown as {

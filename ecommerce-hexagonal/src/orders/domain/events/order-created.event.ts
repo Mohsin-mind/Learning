@@ -1,4 +1,4 @@
-import { OrderItem } from '../order-item.entity.js';
+import { OrderItem } from "../order-item.entity.js";
 
 export class OrderCreatedEvent {
   constructor(

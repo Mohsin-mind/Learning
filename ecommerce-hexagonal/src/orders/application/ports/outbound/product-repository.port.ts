@@ -1,6 +1,6 @@
-import { Product } from '../../../../products/domain/product.entity.js';
+import { Product } from "../../../../products/domain/product.entity.js";
 
-export const ORDER_PRODUCT_REPOSITORY = Symbol('OrderProductRepository');
+export const ORDER_PRODUCT_REPOSITORY = Symbol("OrderProductRepository");
 
 export interface OrderProductRepository {
   findById(id: string): Promise<Product | null>;

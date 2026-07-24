@@ -5,30 +5,30 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { TypeOrmOrder } from './typeorm-order.entity.js';
+} from "typeorm";
+import { TypeOrmOrder } from "./typeorm-order.entity.js";
 
-@Entity('order_items')
+@Entity("order_items")
 export class TypeOrmOrderItem {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   orderId: string;
 
   @ManyToOne(() => TypeOrmOrder, (order) => order.items, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
   })
-  @JoinColumn({ name: 'orderId' })
+  @JoinColumn({ name: "orderId" })
   order: TypeOrmOrder;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   productId: string;
 
   @Column()
   productName: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   price: number;
 
   @Column()

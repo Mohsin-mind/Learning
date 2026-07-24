@@ -1,4 +1,4 @@
-import { Money } from '../../shared/domain/value-objects/money.js';
+import { Money } from "../../shared/domain/value-objects/money.js";
 
 export class OrderItem {
   constructor(

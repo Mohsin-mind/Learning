@@ -6,20 +6,20 @@ import {
   UpdateDateColumn,
   VersionColumn,
   DeleteDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
-@Entity('products')
+@Entity("products")
 export class TypeOrmProduct {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   name: string;
 
-  @Column('text')
+  @Column("text")
   description: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   price: number;
 
   @Column({ default: 0 })

@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   PaymentGateway,
   PaymentResult,
-} from '../../application/ports/outbound/payment-gateway.port.js';
+} from "../../application/ports/outbound/payment-gateway.port.js";
 
 @Injectable()
 export class StripePaymentAdapter implements PaymentGateway {

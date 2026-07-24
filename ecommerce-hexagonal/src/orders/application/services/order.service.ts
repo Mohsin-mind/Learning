@@ -1,46 +1,22 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
-import { Order } from '../../domain/order.entity.js';
-import { OrderItem } from '../../domain/order-item.entity.js';
-import { Money } from '../../../shared/domain/value-objects/money.js';
-import { OrderStatus } from '../../../shared/domain/value-objects/order-status.js';
-import type {
-  CreateOrderUseCase,
-} from '../ports/inbound/create-order.use-case.js';
-import {
-  CREATE_ORDER_USE_CASE,
-} from '../ports/inbound/create-order.use-case.js';
-import type {
-  UpdateOrderStatusUseCase,
-} from '../ports/inbound/update-order-status.use-case.js';
-import {
-  UPDATE_ORDER_STATUS_USE_CASE,
-} from '../ports/inbound/update-order-status.use-case.js';
-import type {
-  GetOrderQuery,
-} from '../ports/inbound/get-order.query.js';
-import {
-  GET_ORDER_QUERY,
-} from '../ports/inbound/get-order.query.js';
-import type {
-  OrderRepository,
-} from '../ports/outbound/order-repository.port.js';
-import {
-  ORDER_REPOSITORY,
-} from '../ports/outbound/order-repository.port.js';
-import type {
-  OrderProductRepository,
-} from '../ports/outbound/product-repository.port.js';
-import {
-  ORDER_PRODUCT_REPOSITORY,
-} from '../ports/outbound/product-repository.port.js';
-import type {
-  PaymentGateway,
-} from '../ports/outbound/payment-gateway.port.js';
-import {
-  PAYMENT_GATEWAY,
-} from '../ports/outbound/payment-gateway.port.js';
-import type { CreateOrderDto } from '../../infrastructure/web/dto/create-order.dto.js';
+import { Inject, Injectable } from "@nestjs/common";
+import { v4 as uuid } from "uuid";
+import { Order } from "../../domain/order.entity.js";
+import { OrderItem } from "../../domain/order-item.entity.js";
+import { Money } from "../../../shared/domain/value-objects/money.js";
+import { OrderStatus } from "../../../shared/domain/value-objects/order-status.js";
+import type { CreateOrderUseCase } from "../ports/inbound/create-order.use-case.js";
+import { CREATE_ORDER_USE_CASE } from "../ports/inbound/create-order.use-case.js";
+import type { UpdateOrderStatusUseCase } from "../ports/inbound/update-order-status.use-case.js";
+import { UPDATE_ORDER_STATUS_USE_CASE } from "../ports/inbound/update-order-status.use-case.js";
+import type { GetOrderQuery } from "../ports/inbound/get-order.query.js";
+import { GET_ORDER_QUERY } from "../ports/inbound/get-order.query.js";
+import type { OrderRepository } from "../ports/outbound/order-repository.port.js";
+import { ORDER_REPOSITORY } from "../ports/outbound/order-repository.port.js";
+import type { OrderProductRepository } from "../ports/outbound/product-repository.port.js";
+import { ORDER_PRODUCT_REPOSITORY } from "../ports/outbound/product-repository.port.js";
+import type { PaymentGateway } from "../ports/outbound/payment-gateway.port.js";
+import { PAYMENT_GATEWAY } from "../ports/outbound/payment-gateway.port.js";
+import type { CreateOrderDto } from "../../infrastructure/web/dto/create-order.dto.js";
 
 @Injectable()
 export class OrderService
@@ -83,7 +59,10 @@ export class OrderService
 
     const order = Order.create(uuid(), userId, items);
 
-    const payment = await this.paymentGateway.charge(order.id, order.total.amount);
+    const payment = await this.paymentGateway.charge(
+      order.id,
+      order.total.amount,
+    );
     if (payment.success) {
       order.changeStatus(OrderStatus.CONFIRMED);
     }

@@ -1,4 +1,4 @@
-import { User } from '../../users/domain/user.entity.js';
+import { User } from "../../users/domain/user.entity.js";
 
 export class AuthResponseDto {
   user!: {

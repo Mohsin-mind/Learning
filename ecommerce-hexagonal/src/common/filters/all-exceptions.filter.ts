@@ -6,8 +6,8 @@ import {
   HttpStatus,
   Injectable,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Request, Response } from "express";
 
 interface ErrorResponseBody {
   success: false;
@@ -59,11 +59,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   private getMessages(exception: unknown): string[] {
     if (!(exception instanceof HttpException)) {
-      return ['Internal server error'];
+      return ["Internal server error"];
     }
 
     const exceptionResponse = exception.getResponse();
-    if (typeof exceptionResponse === 'string') {
+    if (typeof exceptionResponse === "string") {
       return [exceptionResponse];
     }
 
@@ -72,19 +72,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return message.map(String);
     }
 
-    return [typeof message === 'string' ? message : exception.message];
+    return [typeof message === "string" ? message : exception.message];
   }
 
   private getErrorName(exception: unknown, status: number): string {
     if (exception instanceof HttpException) {
       const exceptionResponse = exception.getResponse();
       if (
-        typeof exceptionResponse === 'object' &&
+        typeof exceptionResponse === "object" &&
         exceptionResponse !== null &&
-        'error' in exceptionResponse
+        "error" in exceptionResponse
       ) {
         const error = (exceptionResponse as Record<string, unknown>).error;
-        if (typeof error === 'string') {
+        if (typeof error === "string") {
           return error;
         }
       }
@@ -93,7 +93,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     return status === INTERNAL_SERVER_ERROR_STATUS
-      ? 'Internal Server Error'
-      : 'Error';
+      ? "Internal Server Error"
+      : "Error";
   }
 }

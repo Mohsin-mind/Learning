@@ -3,18 +3,18 @@ import {
   Inject,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import type { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { authConfig } from '../config/auth.config.js';
-import { USER_REPOSITORY } from '../users/application/ports/outbound/user-repository.port.js';
-import type { UserRepository } from '../users/application/ports/outbound/user-repository.port.js';
-import { User, UserRole } from '../users/domain/user.entity.js';
-import { RegisterDto } from './dto/register.dto.js';
-import { LoginDto } from './dto/login.dto.js';
-import { RefreshTokenDto } from './dto/refresh-token.dto.js';
-import { AuthResponseDto } from './dto/auth-response.dto.js';
+} from "@nestjs/common";
+import type { ConfigType } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { authConfig } from "../config/auth.config.js";
+import { USER_REPOSITORY } from "../users/application/ports/outbound/user-repository.port.js";
+import type { UserRepository } from "../users/application/ports/outbound/user-repository.port.js";
+import { User, UserRole } from "../users/domain/user.entity.js";
+import { RegisterDto } from "./dto/register.dto.js";
+import { LoginDto } from "./dto/login.dto.js";
+import { RefreshTokenDto } from "./dto/refresh-token.dto.js";
+import { AuthResponseDto } from "./dto/auth-response.dto.js";
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
     const existing = await this.userRepository.findByEmail(dto.email);
     if (existing) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException("Email already registered");
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -48,12 +48,12 @@ export class AuthService {
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.userRepository.findByEmail(dto.email);
     if (!user || !user.password) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     return AuthResponseDto.fromUser(user, this.generateTokens(user));
@@ -70,12 +70,12 @@ export class AuthService {
 
       const user = await this.userRepository.findById(payload.sub);
       if (!user) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException("Invalid refresh token");
       }
 
       return AuthResponseDto.fromUser(user, this.generateTokens(user));
     } catch {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException("Invalid or expired refresh token");
     }
   }
 

@@ -6,33 +6,33 @@ import {
   UpdateDateColumn,
   OneToMany,
   JoinColumn,
-} from 'typeorm';
-import { TypeOrmOrderItem } from './typeorm-order-item.entity.js';
+} from "typeorm";
+import { TypeOrmOrderItem } from "./typeorm-order-item.entity.js";
 
 export enum OrmOrderStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  SHIPPED = 'shipped',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  SHIPPED = "shipped",
+  DELIVERED = "delivered",
+  CANCELLED = "cancelled",
 }
 
-@Entity('orders')
+@Entity("orders")
 export class TypeOrmOrder {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   userId: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: OrmOrderStatus,
     default: OrmOrderStatus.PENDING,
   })
   status: OrmOrderStatus;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   total: number;
 
   @OneToMany(() => TypeOrmOrderItem, (item) => item.order, { cascade: true })
