@@ -10,16 +10,16 @@ import { OrderStatusChangedEvent } from './events/order-status-changed.event.js'
 type OrderEvent = OrderCreatedEvent | OrderStatusChangedEvent;
 
 export class Order {
-  private _events: OrderEvent[] = [];
+  private events: OrderEvent[] = [];
 
-  private constructor(
-    private readonly _id: string,
-    private readonly _userId: string,
-    private _status: OrderStatus,
-    private _total: Money,
-    private readonly _items: OrderItem[],
-    private readonly _createdAt: Date,
-    private _updatedAt: Date,
+  constructor(
+    public readonly id: string,
+    public readonly userId: string,
+    public status: OrderStatus,
+    public total: Money,
+    public readonly items: OrderItem[],
+    public readonly createdAt: Date,
+    public updatedAt: Date,
   ) {}
 
   static create(
@@ -41,7 +41,7 @@ export class Order {
       now,
       now,
     );
-    order._events.push(
+    order.events.push(
       new OrderCreatedEvent(id, userId, total.amount, items, now),
     );
     return order;
@@ -67,50 +67,22 @@ export class Order {
     );
   }
 
-  get id(): string {
-    return this._id;
-  }
-
-  get userId(): string {
-    return this._userId;
-  }
-
-  get status(): OrderStatus {
-    return this._status;
-  }
-
-  get total(): Money {
-    return this._total;
-  }
-
-  get items(): OrderItem[] {
-    return [...this._items];
-  }
-
-  get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
   changeStatus(newStatus: OrderStatus): void {
-    if (!canTransition(this._status, newStatus)) {
+    if (!canTransition(this.status, newStatus)) {
       throw new Error(
-        `Cannot transition from ${this._status} to ${newStatus}`,
+        `Cannot transition from ${this.status} to ${newStatus}`,
       );
     }
-    this._status = newStatus;
-    this._updatedAt = new Date();
-    this._events.push(
-      new OrderStatusChangedEvent(this._id, this._status, this._updatedAt),
+    this.status = newStatus;
+    this.updatedAt = new Date();
+    this.events.push(
+      new OrderStatusChangedEvent(this.id, this.status, this.updatedAt),
     );
   }
 
   pullEvents(): OrderEvent[] {
-    const events = [...this._events];
-    this._events = [];
+    const events = [...this.events];
+    this.events = [];
     return events;
   }
 }

@@ -10,24 +10,14 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import type {
-  CreateOrderUseCase,
-} from '../../application/ports/inbound/create-order.use-case.js';
-import {
-  CREATE_ORDER_USE_CASE,
-} from '../../application/ports/inbound/create-order.use-case.js';
-import type {
-  UpdateOrderStatusUseCase,
-} from '../../application/ports/inbound/update-order-status.use-case.js';
-import {
-  UPDATE_ORDER_STATUS_USE_CASE,
-} from '../../application/ports/inbound/update-order-status.use-case.js';
-import type {
-  GetOrderQuery,
-} from '../../application/ports/inbound/get-order.query.js';
-import {
-  GET_ORDER_QUERY,
-} from '../../application/ports/inbound/get-order.query.js';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
+import { User } from '../../../users/domain/user.entity.js';
+import type { CreateOrderUseCase } from '../../application/ports/inbound/create-order.use-case.js';
+import { CREATE_ORDER_USE_CASE } from '../../application/ports/inbound/create-order.use-case.js';
+import type { UpdateOrderStatusUseCase } from '../../application/ports/inbound/update-order-status.use-case.js';
+import { UPDATE_ORDER_STATUS_USE_CASE } from '../../application/ports/inbound/update-order-status.use-case.js';
+import type { GetOrderQuery } from '../../application/ports/inbound/get-order.query.js';
+import { GET_ORDER_QUERY } from '../../application/ports/inbound/get-order.query.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto.js';
 
@@ -43,10 +33,12 @@ export class OrdersController {
   ) {}
 
   @Post()
-  async create(@Body() dto: CreateOrderDto) {
+  async create(
+    @CurrentUser() user: User,
+    @Body() dto: CreateOrderDto,
+  ) {
     try {
-      const userId = '00000000-0000-0000-0000-000000000001';
-      return await this.createOrderCase.execute(dto, userId);
+      return await this.createOrderCase.execute(dto, user.id);
     } catch (err: unknown) {
       if (err instanceof Error) {
         throw new ConflictException(err.message);

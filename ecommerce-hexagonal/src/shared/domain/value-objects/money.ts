@@ -1,27 +1,19 @@
 export class Money {
-  constructor(private readonly _amount: number) {
-    if (_amount < 0) {
+  constructor(public readonly amount: number) {
+    if (amount < 0) {
       throw new Error('Money cannot be negative');
     }
   }
 
-  get amount(): number {
-    return this._amount;
-  }
-
   add(other: Money): Money {
-    return new Money(this._amount + other._amount);
+    return new Money(this.amount + other.amount);
   }
 
   multiply(quantity: number): Money {
-    return new Money(this._amount * quantity);
+    return new Money(this.amount * quantity);
   }
 
   equals(other: Money): boolean {
-    return this._amount === other._amount;
-  }
-
-  toJSON(): string {
-    return `$${this._amount.toFixed(2)}`;
+    return this.amount === other.amount;
   }
 }
